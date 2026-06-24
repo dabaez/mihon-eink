@@ -397,7 +397,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
                 if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
                     return false
                 } else if (isUp) {
-                    // Debounce: ignore duplicate presses within 300ms
+                    // Debounce: ignore duplicate presses within 600ms
                     if (now - lastVolumeKeyTime < VOLUME_KEY_DEBOUNCE_MS) return true
                     lastVolumeKeyTime = now
                     if (!config.volumeKeysInverted) moveDown() else moveUp()
@@ -407,7 +407,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
                 if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
                     return false
                 } else if (isUp) {
-                    // Debounce: ignore duplicate presses within 300ms
+                    // Debounce: ignore duplicate presses within 600ms
                     if (now - lastVolumeKeyTime < VOLUME_KEY_DEBOUNCE_MS) return true
                     lastVolumeKeyTime = now
                     if (!config.volumeKeysInverted) moveUp() else moveDown()

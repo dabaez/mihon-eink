@@ -74,7 +74,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
 
     private val threshold: Int =
         Injekt.get<ReaderPreferences>()
-            .readerHideThreshold()
+            .readerHideThreshold
             .get()
             .threshold
 
@@ -318,7 +318,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
                 if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
                     return false
                 } else if (isUp) {
-                    // Debounce: ignore duplicate presses within 300ms
+                    // Debounce: ignore duplicate presses within 600ms
                     if (now - lastVolumeKeyTime < VOLUME_KEY_DEBOUNCE_MS) return true
                     lastVolumeKeyTime = now
                     if (!config.volumeKeysInverted) scrollDown() else scrollUp()
@@ -328,7 +328,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
                 if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
                     return false
                 } else if (isUp) {
-                    // Debounce: ignore duplicate presses within 300ms
+                    // Debounce: ignore duplicate presses within 600ms
                     if (now - lastVolumeKeyTime < VOLUME_KEY_DEBOUNCE_MS) return true
                     lastVolumeKeyTime = now
                     if (!config.volumeKeysInverted) scrollUp() else scrollDown()
