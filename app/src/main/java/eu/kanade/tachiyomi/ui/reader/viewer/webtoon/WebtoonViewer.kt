@@ -303,7 +303,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
 
     // Debounce timer for volume keys - prevents double presses on e-ink devices
     private var lastVolumeKeyTime: Long = 0
-    private val VOLUME_KEY_DEBOUNCE_MS = 600L
+    private val volumeKeyDebounceMs = 600L
 
     /**
      * Called from the containing activity when a key [event] is received. It should return true
@@ -319,7 +319,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
                     return false
                 } else if (isUp) {
                     // Debounce: ignore duplicate presses within 300ms
-                    if (now - lastVolumeKeyTime < VOLUME_KEY_DEBOUNCE_MS) return true
+                    if (now - lastVolumeKeyTime < volumeKeyDebounceMs) return true
                     lastVolumeKeyTime = now
                     if (!config.volumeKeysInverted) scrollDown() else scrollUp()
                 }
@@ -329,7 +329,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
                     return false
                 } else if (isUp) {
                     // Debounce: ignore duplicate presses within 300ms
-                    if (now - lastVolumeKeyTime < VOLUME_KEY_DEBOUNCE_MS) return true
+                    if (now - lastVolumeKeyTime < volumeKeyDebounceMs) return true
                     lastVolumeKeyTime = now
                     if (!config.volumeKeysInverted) scrollUp() else scrollDown()
                 }
