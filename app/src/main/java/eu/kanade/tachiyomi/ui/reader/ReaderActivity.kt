@@ -526,7 +526,7 @@ class ReaderActivity : BaseActivity() {
             },
             onClickSettings = viewModel::openSettingsDialog,
             // E-ink: Show custom status overlay from preference
-            showStatusOverlay = readerPreferences.showStatusOverlay().collectAsState().value,
+            showStatusOverlay = readerPreferences.showStatusOverlay.collectAsState().value,
         )
     }
 

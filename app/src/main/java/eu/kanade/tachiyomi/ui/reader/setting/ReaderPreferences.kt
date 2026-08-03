@@ -104,7 +104,7 @@ class ReaderPreferences(
     val webtoonDisableZoomOut: Preference<Boolean> = preferenceStore.getBoolean("webtoon_disable_zoom_out", false)
 
     // E-ink: Show status overlay preference
-    fun showStatusOverlay() = preferenceStore.getBoolean("pref_reader_status_overlay", true)
+    val showStatusOverlay: Preference<Boolean> = preferenceStore.getBoolean("pref_reader_status_overlay", true)
 
     // endregion
 

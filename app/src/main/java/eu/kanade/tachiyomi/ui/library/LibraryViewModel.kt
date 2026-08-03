@@ -609,11 +609,11 @@ class LibraryViewModel(
 
     // E-Ink pagination
     fun getPaginationEnabled(): PreferenceMutableState<Boolean> {
-        return libraryPreferences.libraryPagination().asState(screenModelScope)
+        return libraryPreferences.libraryPagination().asState(viewModelScope)
     }
 
     fun getPaginationItemsPerPage(): PreferenceMutableState<Int> {
-        return libraryPreferences.libraryPageItems().asState(screenModelScope)
+        return libraryPreferences.libraryPageItems().asState(viewModelScope)
     }
 
     fun libraryPageNext() {

@@ -222,8 +222,8 @@ data object LibraryTab : Tab {
                         getColumnsForOrientation = { viewModel.getColumnsForOrientation(it) },
                         getItemsForCategory = { state.getItemsForCategory(it) },
                         // E-Ink pagination
-                        getPaginationEnabled = { screenModel.getPaginationEnabled() },
-                        getPaginationItemsPerPage = { screenModel.getPaginationItemsPerPage() },
+                        getPaginationEnabled = { viewModel.getPaginationEnabled() },
+                        getPaginationItemsPerPage = { viewModel.getPaginationItemsPerPage() },
                     )
                 }
             }

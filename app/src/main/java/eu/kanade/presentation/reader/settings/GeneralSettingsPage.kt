@@ -47,7 +47,7 @@ internal fun ColumnScope.GeneralPage(viewModel: ReaderSettingsViewModel) {
     val flashColorPref = viewModel.preferences.flashColor
     val flashColor by flashColorPref.collectAsState()
 
-    val showStatusOverlay by screenModel.preferences.showStatusOverlay().collectAsState()
+    val showStatusOverlay by viewModel.preferences.showStatusOverlay.collectAsState()
 
     SettingsChipRow(MR.strings.pref_reader_theme) {
         themes.map { (labelRes, value) ->
@@ -141,7 +141,7 @@ internal fun ColumnScope.GeneralPage(viewModel: ReaderSettingsViewModel) {
 
     CheckboxItem(
         label = "Show status overlay",
-        pref = screenModel.preferences.showStatusOverlay(),
+        pref = viewModel.preferences.showStatusOverlay,
     )
 
     if (flashPageState) {
