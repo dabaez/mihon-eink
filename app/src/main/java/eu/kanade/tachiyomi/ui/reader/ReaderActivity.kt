@@ -843,7 +843,7 @@ class ReaderActivity : BaseActivity() {
             // Enable dithering for E-Ink (helps with gradients on 1-bit displays)
             paint.setDither(true)
             paint.setFilterBitmap(true)
-            
+
             paint.colorFilter = ColorMatrixColorFilter(
                 ColorMatrix().apply {
                     if (grayscale) {
@@ -863,7 +863,7 @@ class ReaderActivity : BaseActivity() {
                     }
                 },
             )
-            
+
             return paint
         }
 
@@ -996,7 +996,9 @@ class ReaderActivity : BaseActivity() {
         private fun setLayerPaint(grayscale: Boolean, invertedColors: Boolean) {
             val paint = if (grayscale || invertedColors) {
                 getCombinedPaint(grayscale, invertedColors)
-            } else null
+            } else {
+                null
+            }
             binding.viewerContainer.setLayerType(LAYER_TYPE_HARDWARE, paint)
         }
     }

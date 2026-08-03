@@ -138,12 +138,12 @@ internal fun ColumnScope.GeneralPage(viewModel: ReaderSettingsViewModel) {
         label = stringResource(MR.strings.pref_flash_page),
         pref = viewModel.preferences.flashOnPageChange,
     )
-    
+
     CheckboxItem(
         label = "Show status overlay",
         pref = screenModel.preferences.showStatusOverlay(),
     )
-    
+
     if (flashPageState) {
         SliderItem(
             value = flashMillis / ReaderPreferences.MILLI_CONVERSION,

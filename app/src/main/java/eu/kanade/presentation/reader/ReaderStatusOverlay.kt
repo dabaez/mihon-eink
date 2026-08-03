@@ -14,17 +14,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,31 +63,44 @@ fun ReaderStatusOverlay(
 
     // 12-hour format with AM/PM
     val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-    
+
     LaunchedEffect(Unit) {
         while (true) {
             timeText = timeFormat.format(Date())
-            
+
             // Update battery info
             val batteryFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-            ContextCompat.registerReceiver(context, null, batteryFilter, ContextCompat.RECEIVER_NOT_EXPORTED)?.also { batteryStatus ->
+            ContextCompat.registerReceiver(
+                context,
+                null,
+                batteryFilter,
+                ContextCompat.RECEIVER_NOT_EXPORTED,
+            )?.also { batteryStatus ->
                 val level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
                 val scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
                 batteryPct = if (scale > 0) (level * 100 / scale.toFloat()).toInt() else 0
                 batteryText = "$batteryPct%"
-                
+
                 // Check if charging
-                val status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_UNKNOWN)
+                val status = batteryStatus.getIntExtra(
+                    BatteryManager.EXTRA_STATUS,
+                    BatteryManager.BATTERY_STATUS_UNKNOWN,
+                )
                 isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING
             }
-            
+
             // Update WiFi status
             val wifiFilter = IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION)
-            ContextCompat.registerReceiver(context, null, wifiFilter, ContextCompat.RECEIVER_NOT_EXPORTED)?.also { wifiStatus ->
+            ContextCompat.registerReceiver(
+                context,
+                null,
+                wifiFilter,
+                ContextCompat.RECEIVER_NOT_EXPORTED,
+            )?.also { wifiStatus ->
                 val state = wifiStatus.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN)
                 wifiConnected = state == WifiManager.WIFI_STATE_ENABLED || state == WifiManager.WIFI_STATE_ENABLING
             }
-            
+
             delay(60000) // Update every minute
         }
     }
@@ -110,7 +123,6 @@ fun ReaderStatusOverlay(
         exit = fadeOut(animationSpec = tween(0)),
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            
             // LEFT SIDE: Time, Battery, WiFi
             Box(
                 modifier = Modifier
@@ -131,7 +143,7 @@ fun ReaderStatusOverlay(
                             Text(text = timeText, style = strokeStyle)
                             Text(text = timeText, style = timeStyle)
                         }
-                        
+
                         // Divider
                         Box(
                             modifier = Modifier
@@ -139,17 +151,20 @@ fun ReaderStatusOverlay(
                                 .height(16.dp)
                                 .background(Color(128, 128, 128, 64)),
                         )
-                        
+
                         // Battery: text with outline (green when charging)
                         val batteryColor = if (isCharging) Color(0xFF4CAF50) else Color(235, 235, 235)
                         val batteryStrokeColor = if (isCharging) Color(0xFF1B5E20) else Color(45, 45, 45)
                         val batteryStyle = timeStyle.copy(color = batteryColor)
-                        val batteryStrokeStyle = batteryStyle.copy(color = batteryStrokeColor, drawStyle = Stroke(width = 4f))
+                        val batteryStrokeStyle = batteryStyle.copy(
+                            color = batteryStrokeColor,
+                            drawStyle = Stroke(width = 4f),
+                        )
                         Box {
                             Text(text = batteryText, style = batteryStrokeStyle)
                             Text(text = batteryText, style = batteryStyle)
                         }
-                        
+
                         // Divider
                         Box(
                             modifier = Modifier
@@ -157,7 +172,7 @@ fun ReaderStatusOverlay(
                                 .height(16.dp)
                                 .background(Color(128, 128, 128, 64)),
                         )
-                        
+
                         // WiFi: text (back to text, cleaner)
                         Box {
                             Text(text = if (wifiConnected) "WiFi" else "", style = strokeStyle)
@@ -166,7 +181,7 @@ fun ReaderStatusOverlay(
                     }
                 }
             }
-            
+
             // RIGHT SIDE: Chapter + Page info
             Box(
                 modifier = Modifier
@@ -186,11 +201,11 @@ fun ReaderStatusOverlay(
                         if (currentChapter != null && totalChapters != null && totalChapters > 0) {
                             // Extract just the chapter number from strings like "Chapter002 (12MiB)" or "ch. 2"
                             val chapterNum = extractChapterNumber(currentChapter)
-                            
+
                             val chapterText = "ch. $chapterNum/$totalChapters"
                             val pageText = "pg. $currentPage/$totalPages"
                             val combinedText = "$chapterText $pageText"
-                            
+
                             Box {
                                 Text(text = combinedText, style = strokeStyle)
                                 Text(text = combinedText, style = timeStyle)
@@ -213,7 +228,7 @@ fun ReaderStatusOverlay(
 /**
  * Extract chapter number from various chapter title formats:
  * - "Chapter002 (12MiB)" → 2
- * - "ch. 2" → 2  
+ * - "ch. 2" → 2
  * - "Chapter 2" → 2
  * - "002" → 2
  */
@@ -221,17 +236,17 @@ private fun extractChapterNumber(chapterTitle: String): Int {
     // Try to find digits after "Chapter" or "ch"
     val chapterRegex = Regex("(?:Chapter|ch)\\s*(\\d+)", RegexOption.IGNORE_CASE)
     val match = chapterRegex.find(chapterTitle)
-    
+
     if (match != null) {
         return match.groupValues[1].toIntOrNull() ?: 0
     }
-    
+
     // Fallback: try to get first number sequence
     val numberRegex = Regex("(\\d+)")
     val numberMatch = numberRegex.find(chapterTitle)
     if (numberMatch != null) {
         return numberMatch.groupValues[1].toIntOrNull() ?: 0
     }
-    
+
     return 0
 }

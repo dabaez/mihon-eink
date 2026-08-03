@@ -1,6 +1,7 @@
 package eu.kanade.presentation.library.components
 
 import android.content.res.Configuration
+import android.view.KeyEvent
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +23,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedIconButton
-import android.view.KeyEvent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,9 +39,9 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import eu.kanade.core.preference.PreferenceMutableState
 import eu.kanade.tachiyomi.ui.library.LibraryItem
+import kotlinx.coroutines.launch
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.domain.library.model.LibraryManga
@@ -69,7 +69,7 @@ fun LibraryPager(
     itemsPerPage: Int = 12,
 ) {
     val itemsScope = rememberCoroutineScope()
-    
+
     // Volume key handler - will be attached to the pager content
     fun handleVolumeKey(isNext: Boolean, itemsPagerState: PagerState) {
         if (!isPaginationEnabled) return
@@ -131,16 +131,16 @@ fun LibraryPager(
             // Create nested pager for items within this category
             val itemsPagerState = rememberPagerState(
                 initialPage = 0,
-                pageCount = { (allItems.size + itemsPerPage - 1) / itemsPerPage } // ceiling division
+                pageCount = { (allItems.size + itemsPerPage - 1) / itemsPerPage }, // ceiling division
             )
-            
+
             // Focus for volume key capture
             val pagerFocusRequester = remember { FocusRequester() }
-            
+
             // Debounce for volume keys to prevent double-presses
             val lastVolumePressState = remember { mutableLongStateOf(0L) }
             val debounceMs = 300L // 300ms between presses
-            
+
             // Volume key handler - same logic as arrow buttons with debounce
             val volumeKeyModifier = Modifier
                 .focusRequester(pagerFocusRequester)
@@ -151,7 +151,7 @@ fun LibraryPager(
                         // Too soon, consume but don't action
                         return@onPreviewKeyEvent true
                     }
-                    
+
                     when (event.nativeKeyEvent.keyCode) {
                         KeyEvent.KEYCODE_VOLUME_DOWN -> {
                             lastVolumePressState.longValue = now
@@ -180,14 +180,14 @@ fun LibraryPager(
                         else -> false
                     }
                 }
-            
+
             // Request focus when this category page is visible
             LaunchedEffect(state.currentPage) {
                 if (state.currentPage == page) {
                     pagerFocusRequester.requestFocus()
                 }
             }
-            
+
             Column {
                 HorizontalPager(
                     modifier = Modifier
@@ -199,7 +199,7 @@ fun LibraryPager(
                     val startIdx = itemsPage * itemsPerPage
                     val endIdx = minOf(startIdx + itemsPerPage, allItems.size)
                     val pagedItems = allItems.subList(startIdx, endIdx)
-                    
+
                     when (displayMode) {
                         LibraryDisplayMode.List -> {
                             LibraryList(
@@ -242,11 +242,11 @@ fun LibraryPager(
                         }
                     }
                 }
-                
+
                 // Arrow navigation buttons (compact bottom row for E-Ink)
                 if (itemsPagerState.pageCount > 1) {
                     val itemsScope = rememberCoroutineScope()
-                    
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -274,13 +274,13 @@ fun LibraryPager(
                                 tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
                             )
                         }
-                        
+
                         // Page indicator (center, smaller)
                         androidx.compose.material3.Text(
                             text = "${itemsPagerState.currentPage + 1} / ${itemsPagerState.pageCount}",
                             style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
                         )
-                        
+
                         // Right arrow (circle outline, smaller)
                         OutlinedIconButton(
                             onClick = {

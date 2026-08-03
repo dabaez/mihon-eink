@@ -100,16 +100,16 @@ object SettingsMainScreen : Screen() {
         // E-Ink pagination state for settings categories
         val settingsPagerState = rememberPagerState(
             initialPage = 0,
-            pageCount = { items.size }
+            pageCount = { items.size },
         )
 
         // Focus requester for volume key capture
         val pagerFocusRequester = remember { FocusRequester() }
-        
+
         // Debounce state for volume keys (matches PagerViewer logic)
         val lastVolumePressState = remember { mutableLongStateOf(0L) }
         val debounceMs = 600L // 600ms debounce to prevent double-presses on e-ink
-        
+
         val scope = rememberCoroutineScope()
 
         Scaffold(
@@ -150,7 +150,7 @@ object SettingsMainScreen : Screen() {
                                 // Too soon, consume but don't action
                                 return@onPreviewKeyEvent true
                             }
-                            
+
                             when (event.nativeKeyEvent.keyCode) {
                                 KeyEvent.KEYCODE_VOLUME_DOWN -> {
                                     lastVolumePressState.longValue = now
@@ -171,14 +171,15 @@ object SettingsMainScreen : Screen() {
                                         if (settingsPagerState.currentPage > 0) {
                                             settingsPagerState.scrollToPage(settingsPagerState.currentPage - 1)
                                         } else {
-                                            settingsPagerState.scrollToPage(settingsPagerState.pageCount - 1) // wraparound
+                                            // wraparound
+                                            settingsPagerState.scrollToPage(settingsPagerState.pageCount - 1)
                                         }
                                     }
                                     true
                                 }
                                 else -> false
                             }
-                        }
+                        },
                 ) {
                     // HorizontalPager for settings categories - e-ink friendly (no animations)
                     // Each page now shows ALL settings for that category inline
@@ -194,7 +195,7 @@ object SettingsMainScreen : Screen() {
                         } else {
                             false
                         }
-                        
+
                         var modifier: Modifier = Modifier
                         var contentColor = LocalContentColor.current
                         if (twoPane) {
@@ -212,7 +213,7 @@ object SettingsMainScreen : Screen() {
                                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                             }
                         }
-                        
+
                         CompositionLocalProvider(LocalContentColor provides contentColor) {
                             // Render category header + all settings inline
                             Column(
@@ -225,7 +226,7 @@ object SettingsMainScreen : Screen() {
                                     color = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                                 )
-                                
+
                                 // Render all settings for this category inline
                                 // Only screens implementing SearchableSettings have getPreferences()
                                 val preferences = when (item.screen) {
@@ -240,7 +241,7 @@ object SettingsMainScreen : Screen() {
                                     SettingsAdvancedScreen -> SettingsAdvancedScreen.getPreferences()
                                     else -> emptyList()
                                 }
-                                
+
                                 PreferenceScreen(
                                     items = preferences,
                                     contentPadding = PaddingValues(0.dp),
@@ -268,17 +269,17 @@ object SettingsMainScreen : Screen() {
                                             MaterialTheme.colorScheme.primary
                                         } else {
                                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-                                        }
+                                        },
                                     ),
                             )
                             if (page < settingsPagerState.pageCount - 1) {
                                 Box(modifier = Modifier.padding(horizontal = 4.dp))
                             }
                         }
-                        
+
                         // Spacer between dots and numbers
                         Box(modifier = Modifier.padding(horizontal = 16.dp))
-                        
+
                         // Page number indicator
                         Text(
                             text = "${settingsPagerState.currentPage + 1} / ${settingsPagerState.pageCount}",

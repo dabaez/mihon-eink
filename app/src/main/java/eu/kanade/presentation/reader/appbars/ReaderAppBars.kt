@@ -41,8 +41,8 @@ import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
 import tachiyomi.presentation.core.components.material.padding
 
 // E-ink: Disable animations for instant transitions
-private val readerBarsAnimationSpec = tween<IntOffset>(0)  // 0ms = instant
-private val readerFadeAnimationSpec = tween<Float>(0)      // 0ms = instant
+private val readerBarsAnimationSpec = tween<IntOffset>(0) // 0ms = instant
+private val readerFadeAnimationSpec = tween<Float>(0) // 0ms = instant
 
 @Composable
 fun ReaderAppBars(
@@ -158,7 +158,7 @@ fun ReaderAppBars(
                     totalPages = totalPages,
                     currentChapter = chapterTitle ?: "Chapter",
                     totalChapters = totalChapters,
-                    visible = true,  // Always show during reading
+                    visible = true, // Always show during reading
                 )
             }
 
