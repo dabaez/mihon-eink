@@ -2,12 +2,19 @@ package tachiyomi.data.track
 
 import app.cash.sqldelight.async.coroutines.awaitAsList
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow
 import tachiyomi.data.Database
 import tachiyomi.data.subscribeToList
 import tachiyomi.domain.track.model.Track
 import tachiyomi.domain.track.repository.TrackRepository
 
+@Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class TrackRepositoryImpl(
     private val database: Database,
 ) : TrackRepository {
@@ -43,18 +50,18 @@ class TrackRepositoryImpl(
         )
     }
 
-    override suspend fun insert(track: Track) {
-        insertValues(track)
+    override suspend fun upsert(track: Track) {
+        upsertValues(track)
     }
 
-    override suspend fun insertAll(tracks: List<Track>) {
-        insertValues(*tracks.toTypedArray())
+    override suspend fun upsertAll(tracks: List<Track>) {
+        upsertValues(*tracks.toTypedArray())
     }
 
-    private suspend fun insertValues(vararg tracks: Track) {
+    private suspend fun upsertValues(vararg tracks: Track) {
         database.transaction {
             tracks.forEach { mangaTrack ->
-                database.manga_syncQueries.insert(
+                database.manga_syncQueries.upsert(
                     mangaId = mangaTrack.mangaId,
                     syncId = mangaTrack.trackerId,
                     remoteId = mangaTrack.remoteId,
