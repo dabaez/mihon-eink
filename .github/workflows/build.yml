@@ -51,20 +51,23 @@ jobs:
 
       - name: Run unit tests
         id: unit_tests
-        run: ./gradlew testReleaseUnitTest
+        run: ./gradlew testDebugUnitTest
+
+      - name: Verify SQLDelight migrations
+        run: ./gradlew verifySqlDelightMigration
 
       - name: Upload test report
         if: steps.unit_tests.outcome == 'failure'
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: test-report-${{ github.sha }}
-          path: app/build/reports/tests/testReleaseUnitTest
+          path: app/build/reports/tests/testDebugUnitTest
 
       - name: Upload APK
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: arm64-v8a-${{ github.sha }}
-          path: app/build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+          path: app/build/outputs/apk/release/app-arm64-v8a-release*.apk
 
       - name: Upload mapping
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
