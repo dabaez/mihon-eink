@@ -172,12 +172,15 @@ class ReaderActivity : BaseActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             overrideActivityTransition(
                 OVERRIDE_TRANSITION_OPEN,
-                R.anim.shared_axis_x_push_enter,
-                R.anim.shared_axis_x_push_exit,
+                transitionAnim(R.anim.shared_axis_x_push_enter),
+                transitionAnim(R.anim.shared_axis_x_push_exit),
             )
         } else {
             @Suppress("DEPRECATION")
-            overridePendingTransition(R.anim.shared_axis_x_push_enter, R.anim.shared_axis_x_push_exit)
+            overridePendingTransition(
+                transitionAnim(R.anim.shared_axis_x_push_enter),
+                transitionAnim(R.anim.shared_axis_x_push_exit),
+            )
         }
 
         enableEdgeToEdge()
@@ -434,6 +437,12 @@ class ReaderActivity : BaseActivity() {
     }
 
     /**
+     * The [anim] to switch to or from the reader with, or none in e-ink mode. None has to be 0, as not overriding
+     * would animate with the system's default.
+     */
+    private fun transitionAnim(anim: Int) = if (readerPreferences.einkMode.get()) 0 else anim
+
+    /**
      * Called when the user clicks the back key or the button on the toolbar. The call is
      * delegated to the presenter.
      */
@@ -443,12 +452,15 @@ class ReaderActivity : BaseActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             overrideActivityTransition(
                 OVERRIDE_TRANSITION_CLOSE,
-                R.anim.shared_axis_x_pop_enter,
-                R.anim.shared_axis_x_pop_exit,
+                transitionAnim(R.anim.shared_axis_x_pop_enter),
+                transitionAnim(R.anim.shared_axis_x_pop_exit),
             )
         } else {
             @Suppress("DEPRECATION")
-            overridePendingTransition(R.anim.shared_axis_x_pop_enter, R.anim.shared_axis_x_pop_exit)
+            overridePendingTransition(
+                transitionAnim(R.anim.shared_axis_x_pop_enter),
+                transitionAnim(R.anim.shared_axis_x_pop_exit),
+            )
         }
     }
 

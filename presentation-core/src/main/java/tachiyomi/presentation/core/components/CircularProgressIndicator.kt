@@ -30,17 +30,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.tooling.preview.Preview
+import tachiyomi.presentation.core.util.LocalEinkMode
 
 /**
  * A combined [CircularProgressIndicator] that always rotates.
  *
- * By always rotating we give the feedback to the user that the application isn't 'stuck'.
+ * By always rotating we give the feedback to the user that the application isn't 'stuck'. In e-ink mode
+ * it stands still instead, as every frame of a rotation redraws the screen.
  */
 @Composable
 fun CombinedCircularProgressIndicator(
     progress: () -> Float,
     modifier: Modifier = Modifier,
 ) {
+    if (LocalEinkMode.current) {
+        CircularProgressIndicator(progress = progress, modifier = modifier)
+        return
+    }
     AnimatedContent(
         targetState = progress() == 0f,
         transitionSpec = { fadeIn() togetherWith fadeOut() },
