@@ -33,17 +33,19 @@ fun ScrollbarLazyColumn(
     userScrollEnabled: Boolean = true,
     content: LazyListScope.() -> Unit,
 ) {
+    val einkPager = rememberEinkPager(state)
     Box(
         modifier = modifier,
         propagateMinConstraints = true,
     ) {
         LazyColumn(
+            modifier = Modifier.einkSwipePaging(einkPager),
             state = state,
-            contentPadding = contentPadding,
+            contentPadding = contentPadding.plusEinkPageButtons(einkPager),
             reverseLayout = reverseLayout,
             verticalArrangement = verticalArrangement,
             horizontalAlignment = horizontalAlignment,
-            userScrollEnabled = userScrollEnabled,
+            userScrollEnabled = userScrollEnabled && einkPager == null,
             content = content,
         )
         state.scrollIndicatorState?.let { indicatorState ->
@@ -62,6 +64,7 @@ fun ScrollbarLazyColumn(
                     ),
             )
         }
+        EinkPageButtons(einkPager)
     }
 }
 
@@ -80,6 +83,7 @@ fun FastScrollLazyColumn(
     userScrollEnabled: Boolean = true,
     content: LazyListScope.() -> Unit,
 ) {
+    val einkPager = rememberEinkPager(state)
     VerticalFastScroller(
         listState = state,
         modifier = modifier,
@@ -87,13 +91,15 @@ fun FastScrollLazyColumn(
         endContentPadding = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
     ) {
         LazyColumn(
+            modifier = Modifier.einkSwipePaging(einkPager),
             state = state,
-            contentPadding = contentPadding,
+            contentPadding = contentPadding.plusEinkPageButtons(einkPager),
             reverseLayout = reverseLayout,
             verticalArrangement = verticalArrangement,
             horizontalAlignment = horizontalAlignment,
-            userScrollEnabled = userScrollEnabled,
+            userScrollEnabled = userScrollEnabled && einkPager == null,
             content = content,
         )
+        EinkPageButtons(einkPager)
     }
 }

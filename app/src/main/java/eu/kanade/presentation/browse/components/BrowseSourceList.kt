@@ -2,9 +2,11 @@ package eu.kanade.presentation.browse.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -13,6 +15,10 @@ import eu.kanade.presentation.library.components.MangaListItem
 import kotlinx.coroutines.flow.StateFlow
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaCover
+import tachiyomi.presentation.core.components.EinkPagingBox
+import tachiyomi.presentation.core.components.einkSwipePaging
+import tachiyomi.presentation.core.components.plusEinkPageButtons
+import tachiyomi.presentation.core.components.rememberEinkPager
 import tachiyomi.presentation.core.util.plus
 
 @Composable
@@ -22,27 +28,37 @@ fun BrowseSourceList(
     onMangaClick: (Manga) -> Unit,
     onMangaLongClick: (Manga) -> Unit,
 ) {
-    LazyColumn(
-        contentPadding = contentPadding + PaddingValues(vertical = 8.dp),
-    ) {
-        item {
-            if (mangaList.loadState.prepend is LoadState.Loading) {
-                BrowseSourceLoadingItem()
+    val state = rememberLazyListState()
+    val einkPager = rememberEinkPager(state)
+    EinkPagingBox(einkPager) {
+        LazyColumn(
+            modifier = Modifier.einkSwipePaging(einkPager),
+            state = state,
+            contentPadding = (contentPadding + PaddingValues(vertical = 8.dp)).plusEinkPageButtons(einkPager),
+            userScrollEnabled = einkPager == null,
+        ) {
+            item {
+                if (mangaList.loadState.prepend is LoadState.Loading) {
+                    BrowseSourceLoadingItem()
+                }
             }
-        }
 
-        items(count = mangaList.itemCount) { index ->
-            val manga by mangaList[index]?.collectAsState() ?: return@items
-            BrowseSourceListItem(
-                manga = manga,
-                onClick = { onMangaClick(manga) },
-                onLongClick = { onMangaLongClick(manga) },
-            )
-        }
+            items(count = mangaList.itemCount) { index ->
+                val manga by mangaList[index]?.collectAsState() ?: return@items
+                BrowseSourceListItem(
+                    manga = manga,
+                    onClick = { onMangaClick(manga) },
+                    onLongClick = { onMangaLongClick(manga) },
+                )
+            }
 
-        item {
-            if (mangaList.loadState.refresh is LoadState.Loading || mangaList.loadState.append is LoadState.Loading) {
-                BrowseSourceLoadingItem()
+            item {
+                if (
+                    mangaList.loadState.refresh is LoadState.Loading ||
+                    mangaList.loadState.append is LoadState.Loading
+                ) {
+                    BrowseSourceLoadingItem()
+                }
             }
         }
     }

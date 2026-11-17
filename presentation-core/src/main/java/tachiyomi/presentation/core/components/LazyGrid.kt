@@ -32,6 +32,7 @@ fun FastScrollLazyVerticalGrid(
     userScrollEnabled: Boolean = true,
     content: LazyGridScope.() -> Unit,
 ) {
+    val einkPager = rememberEinkPager(state)
     VerticalGridFastScroller(
         state = state,
         modifier = modifier,
@@ -43,13 +44,15 @@ fun FastScrollLazyVerticalGrid(
     ) {
         LazyVerticalGrid(
             columns = columns,
+            modifier = Modifier.einkSwipePaging(einkPager),
             state = state,
-            contentPadding = contentPadding,
+            contentPadding = contentPadding.plusEinkPageButtons(einkPager),
             reverseLayout = reverseLayout,
             verticalArrangement = verticalArrangement,
             horizontalArrangement = horizontalArrangement,
-            userScrollEnabled = userScrollEnabled,
+            userScrollEnabled = userScrollEnabled && einkPager == null,
             content = content,
         )
+        EinkPageButtons(einkPager)
     }
 }

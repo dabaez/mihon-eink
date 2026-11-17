@@ -30,6 +30,7 @@ import mihon.icons.materialsymbols.rounded.MoreVert
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.TabText
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.LocalEinkMode
 
 object TabbedDialogPaddings {
     val Horizontal = 24.dp
@@ -74,6 +75,8 @@ fun TabbedDialog(
             HorizontalPager(
                 modifier = Modifier.animateContentSize(),
                 state = pagerState,
+                // Paging by drag would move the sheet under the finger, so it's only through the tabs
+                userScrollEnabled = !LocalEinkMode.current,
                 verticalAlignment = Alignment.Top,
                 pageContent = { page -> content(page) },
             )

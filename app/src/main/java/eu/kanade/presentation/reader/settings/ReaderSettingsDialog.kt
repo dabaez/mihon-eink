@@ -2,6 +2,7 @@ package eu.kanade.presentation.reader.settings
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
@@ -16,6 +17,10 @@ import eu.kanade.presentation.components.TabbedDialog
 import eu.kanade.presentation.components.TabbedDialogPaddings
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsViewModel
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.EinkPagingBox
+import tachiyomi.presentation.core.components.einkSwipePaging
+import tachiyomi.presentation.core.components.plusEinkPageButtons
+import tachiyomi.presentation.core.components.rememberEinkPager
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
@@ -54,15 +59,20 @@ fun ReaderSettingsDialog(
                 }
             }
 
-            Column(
-                modifier = Modifier
-                    .padding(vertical = TabbedDialogPaddings.Vertical)
-                    .verticalScroll(rememberScrollState()),
-            ) {
-                when (page) {
-                    0 -> ReadingModePage(viewModel)
-                    1 -> GeneralPage(viewModel)
-                    2 -> ColorFilterPage(viewModel)
+            val scrollState = rememberScrollState()
+            val einkPager = rememberEinkPager(scrollState)
+            EinkPagingBox(einkPager) {
+                Column(
+                    modifier = Modifier
+                        .padding(PaddingValues(vertical = TabbedDialogPaddings.Vertical).plusEinkPageButtons(einkPager))
+                        .einkSwipePaging(einkPager)
+                        .verticalScroll(scrollState, enabled = einkPager == null),
+                ) {
+                    when (page) {
+                        0 -> ReadingModePage(viewModel)
+                        1 -> GeneralPage(viewModel)
+                        2 -> ColorFilterPage(viewModel)
+                    }
                 }
             }
         }

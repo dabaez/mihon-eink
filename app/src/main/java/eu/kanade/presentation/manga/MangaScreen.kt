@@ -68,10 +68,14 @@ import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.model.StubSource
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.EinkPageButtons
 import tachiyomi.presentation.core.components.TwoPanelBox
 import tachiyomi.presentation.core.components.VerticalFastScroller
+import tachiyomi.presentation.core.components.einkSwipePaging
 import tachiyomi.presentation.core.components.material.PullRefresh
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.plusEinkPageButtons
+import tachiyomi.presentation.core.components.rememberEinkPager
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.shouldExpandFAB
 import tachiyomi.source.local.isLocal
@@ -351,19 +355,23 @@ private fun MangaScreenSmallImpl(
             indicatorPadding = PaddingValues(top = topPadding),
         ) {
             val layoutDirection = LocalLayoutDirection.current
+            val einkPager = rememberEinkPager(chapterListState)
             VerticalFastScroller(
                 listState = chapterListState,
                 topContentPadding = topPadding,
                 endContentPadding = contentPadding.calculateEndPadding(layoutDirection),
             ) {
                 LazyColumn(
-                    modifier = Modifier.fillMaxHeight(),
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .einkSwipePaging(einkPager),
                     state = chapterListState,
+                    userScrollEnabled = einkPager == null,
                     contentPadding = PaddingValues(
                         start = contentPadding.calculateStartPadding(layoutDirection),
                         end = contentPadding.calculateEndPadding(layoutDirection),
                         bottom = contentPadding.calculateBottomPadding(),
-                    ),
+                    ).plusEinkPageButtons(einkPager),
                 ) {
                     item(
                         key = MangaScreenItem.INFO_BOX,
@@ -439,6 +447,7 @@ private fun MangaScreenSmallImpl(
                         onChapterSwipe = onChapterSwipe,
                     )
                 }
+                EinkPageButtons(einkPager)
             }
         }
     }
@@ -628,17 +637,21 @@ fun MangaScreenLargeImpl(
                     }
                 },
                 endContent = {
+                    val einkPager = rememberEinkPager(chapterListState)
                     VerticalFastScroller(
                         listState = chapterListState,
                         topContentPadding = contentPadding.calculateTopPadding(),
                     ) {
                         LazyColumn(
-                            modifier = Modifier.fillMaxHeight(),
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .einkSwipePaging(einkPager),
                             state = chapterListState,
+                            userScrollEnabled = einkPager == null,
                             contentPadding = PaddingValues(
                                 top = contentPadding.calculateTopPadding(),
                                 bottom = contentPadding.calculateBottomPadding(),
-                            ),
+                            ).plusEinkPageButtons(einkPager),
                         ) {
                             item(
                                 key = MangaScreenItem.CHAPTER_HEADER,
@@ -665,6 +678,7 @@ fun MangaScreenLargeImpl(
                                 onChapterSwipe = onChapterSwipe,
                             )
                         }
+                        EinkPageButtons(einkPager)
                     }
                 },
             )

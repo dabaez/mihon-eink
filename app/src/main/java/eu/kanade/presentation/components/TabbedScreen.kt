@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.TabText
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.LocalEinkMode
 
 @Composable
 fun TabbedScreen(
@@ -77,6 +78,8 @@ fun TabbedScreen(
             HorizontalPager(
                 modifier = Modifier.fillMaxSize(),
                 state = state,
+                // Paging by drag would move the screen under the finger, so it's only through the tabs
+                userScrollEnabled = !LocalEinkMode.current,
                 verticalAlignment = Alignment.Top,
             ) { page ->
                 tabs[page].content(

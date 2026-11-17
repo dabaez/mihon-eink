@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -16,6 +18,10 @@ import eu.kanade.presentation.library.components.MangaCompactGridItem
 import kotlinx.coroutines.flow.StateFlow
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaCover
+import tachiyomi.presentation.core.components.EinkPagingBox
+import tachiyomi.presentation.core.components.einkSwipePaging
+import tachiyomi.presentation.core.components.plusEinkPageButtons
+import tachiyomi.presentation.core.components.rememberEinkPager
 import tachiyomi.presentation.core.util.plus
 
 @Composable
@@ -26,30 +32,37 @@ fun BrowseSourceCompactGrid(
     onMangaClick: (Manga) -> Unit,
     onMangaLongClick: (Manga) -> Unit,
 ) {
-    LazyVerticalGrid(
-        columns = columns,
-        contentPadding = contentPadding + PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(CommonMangaItemDefaults.GridVerticalSpacer),
-        horizontalArrangement = Arrangement.spacedBy(CommonMangaItemDefaults.GridHorizontalSpacer),
-    ) {
-        if (mangaList.loadState.prepend is LoadState.Loading) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                BrowseSourceLoadingItem()
+    val state = rememberLazyGridState()
+    val einkPager = rememberEinkPager(state)
+    EinkPagingBox(einkPager) {
+        LazyVerticalGrid(
+            columns = columns,
+            modifier = Modifier.einkSwipePaging(einkPager),
+            state = state,
+            contentPadding = (contentPadding + PaddingValues(8.dp)).plusEinkPageButtons(einkPager),
+            userScrollEnabled = einkPager == null,
+            verticalArrangement = Arrangement.spacedBy(CommonMangaItemDefaults.GridVerticalSpacer),
+            horizontalArrangement = Arrangement.spacedBy(CommonMangaItemDefaults.GridHorizontalSpacer),
+        ) {
+            if (mangaList.loadState.prepend is LoadState.Loading) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    BrowseSourceLoadingItem()
+                }
             }
-        }
 
-        items(count = mangaList.itemCount) { index ->
-            val manga by mangaList[index]?.collectAsState() ?: return@items
-            BrowseSourceCompactGridItem(
-                manga = manga,
-                onClick = { onMangaClick(manga) },
-                onLongClick = { onMangaLongClick(manga) },
-            )
-        }
+            items(count = mangaList.itemCount) { index ->
+                val manga by mangaList[index]?.collectAsState() ?: return@items
+                BrowseSourceCompactGridItem(
+                    manga = manga,
+                    onClick = { onMangaClick(manga) },
+                    onLongClick = { onMangaLongClick(manga) },
+                )
+            }
 
-        if (mangaList.loadState.refresh is LoadState.Loading || mangaList.loadState.append is LoadState.Loading) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                BrowseSourceLoadingItem()
+            if (mangaList.loadState.refresh is LoadState.Loading || mangaList.loadState.append is LoadState.Loading) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    BrowseSourceLoadingItem()
+                }
             }
         }
     }
