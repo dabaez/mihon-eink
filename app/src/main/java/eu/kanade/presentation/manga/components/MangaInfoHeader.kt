@@ -104,6 +104,7 @@ import tachiyomi.presentation.core.components.material.TextButton
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.LocalEinkMode
 import tachiyomi.presentation.core.util.clickableNoIndication
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 import kotlin.math.roundToInt
@@ -131,7 +132,7 @@ fun MangaInfoBox(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(manga)
-                .crossfade(true)
+                .crossfade(!LocalEinkMode.current)
                 .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
@@ -364,7 +365,7 @@ private fun MangaAndSourceTitlesLarge(
             modifier = Modifier.fillMaxWidth(0.65f),
             data = ImageRequest.Builder(LocalContext.current)
                 .data(manga)
-                .crossfade(true)
+                .crossfade(!LocalEinkMode.current)
                 .build(),
             contentDescription = stringResource(MR.strings.manga_cover),
             onClick = onCoverClick,
@@ -407,7 +408,7 @@ private fun MangaAndSourceTitlesSmall(
                 .align(Alignment.Top),
             data = ImageRequest.Builder(LocalContext.current)
                 .data(manga)
-                .crossfade(true)
+                .crossfade(!LocalEinkMode.current)
                 .build(),
             contentDescription = stringResource(MR.strings.manga_cover),
             onClick = onCoverClick,

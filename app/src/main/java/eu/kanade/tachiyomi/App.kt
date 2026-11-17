@@ -48,6 +48,7 @@ import eu.kanade.tachiyomi.util.system.DeviceUtil
 import eu.kanade.tachiyomi.util.system.WebViewUtil
 import eu.kanade.tachiyomi.util.system.animatorDurationScale
 import eu.kanade.tachiyomi.util.system.cancelNotification
+import eu.kanade.tachiyomi.util.system.installEinkMotionDurationScale
 import eu.kanade.tachiyomi.util.system.isDebugBuildType
 import eu.kanade.tachiyomi.util.system.notify
 import kotlinx.coroutines.CoroutineScope
@@ -131,6 +132,7 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
 
         Injekt = InjektScope(MetroInjektRegistrar(application = this, graphProvider = this))
         graph.inject(this)
+        installEinkMotionDurationScale(graph.readerPreferences.einkMode)
 
         TelemetryConfig.init(applicationContext)
 
@@ -249,7 +251,7 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
                     .build(),
             )
 
-            crossfade((300 * this@App.animatorDurationScale).toInt())
+            crossfade(if (graph.readerPreferences.einkMode.get()) 0 else (300 * this@App.animatorDurationScale).toInt())
             allowRgb565(DeviceUtil.isLowRamDevice(this@App))
             if (networkPreferences.verboseLogging.get()) logger(DebugLogger())
 

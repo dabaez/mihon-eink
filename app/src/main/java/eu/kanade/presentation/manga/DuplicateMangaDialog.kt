@@ -75,6 +75,7 @@ import tachiyomi.presentation.core.components.BadgeGroup
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.LocalEinkMode
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
 @Composable
@@ -197,7 +198,7 @@ private fun DuplicateMangaListItem(
             MangaCover.Book(
                 data = ImageRequest.Builder(LocalContext.current)
                     .data(manga)
-                    .crossfade(true)
+                    .crossfade(!LocalEinkMode.current)
                     .build(),
                 modifier = Modifier.fillMaxWidth(),
             )
