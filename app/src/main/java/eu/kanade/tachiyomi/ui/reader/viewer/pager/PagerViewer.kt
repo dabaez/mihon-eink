@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.ui.reader.setting.GeneralSettings
 import eu.kanade.tachiyomi.ui.reader.viewer.LocalPageColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.PagedSettings
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView.ZoomStartPosition
+import eu.kanade.tachiyomi.ui.reader.viewer.SwipeDetector
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.collectChanges
 import eu.kanade.tachiyomi.ui.reader.viewer.mouseWheelPaging
@@ -140,6 +141,9 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
         settingsViewModel.general.collectChanges(scope) { old, new ->
             if (old != null && old.theme != new.theme) {
                 refreshAdapter()
+            }
+            if (old?.einkMode != new.einkMode) {
+                pager.swipeDetector = if (new.einkMode) SwipeDetector(activity, ::onSwipe) else null
             }
         }
         settingsViewModel.simplePaged.collectChanges(scope) { old, new ->
@@ -278,6 +282,36 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
                 pager.setCurrentItem(pager.currentItem - 1, general.usePageTransitions)
             }
         }
+    }
+
+    /**
+     * Pans the page a screen [towards] that side, or once it can't, turns to the page there.
+     */
+    private fun onSwipe(towards: SwipeDetector.Direction) {
+        val holder = (tracker.currentPage as? ReaderPage)?.let(::getPageHolder)
+        val isVertical = this is VerticalPagerViewer
+        when (towards) {
+            SwipeDetector.Direction.LEFT -> when {
+                holder?.canPanLeft() == true -> holder.panLeft()
+                !isVertical -> turnPage(-1)
+            }
+            SwipeDetector.Direction.RIGHT -> when {
+                holder?.canPanRight() == true -> holder.panRight()
+                !isVertical -> turnPage(1)
+            }
+            SwipeDetector.Direction.UP -> when {
+                holder?.canPanUp() == true -> holder.panUp()
+                isVertical -> turnPage(-1)
+            }
+            SwipeDetector.Direction.DOWN -> when {
+                holder?.canPanDown() == true -> holder.panDown()
+                isVertical -> turnPage(1)
+            }
+        }
+    }
+
+    private fun turnPage(offset: Int) {
+        pager.setCurrentItem(pager.currentItem + offset, general.usePageTransitions)
     }
 
     /**

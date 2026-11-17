@@ -221,6 +221,10 @@ open class ReaderPageImageView @JvmOverloads constructor(
      */
     fun canPanRight(): Boolean = canPan { it.right }
 
+    fun canPanUp(): Boolean = canPan { it.top }
+
+    fun canPanDown(): Boolean = canPan { it.bottom }
+
     /**
      * Check whether the image can be panned.
      * @param fn a function that returns the direction to check for
@@ -247,6 +251,14 @@ open class ReaderPageImageView @JvmOverloads constructor(
      */
     fun panRight() {
         pan { center, view -> center.also { it.x += view.width / view.scale } }
+    }
+
+    fun panUp() {
+        pan { center, view -> center.also { it.y -= view.height / view.scale } }
+    }
+
+    fun panDown() {
+        pan { center, view -> center.also { it.y += view.height / view.scale } }
     }
 
     /**

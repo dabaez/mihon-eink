@@ -6,6 +6,7 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import androidx.viewpager.widget.DirectionalViewPager
 import eu.kanade.tachiyomi.ui.reader.viewer.GestureDetectorWithLongTap
+import eu.kanade.tachiyomi.ui.reader.viewer.SwipeDetector
 
 /**
  * Pager implementation that listens for tap and long tap and allows temporarily disabling touch
@@ -26,6 +27,11 @@ open class Pager(
      * Long tap listener function to execute when a long tap is detected.
      */
     var longTapListener: ((MotionEvent) -> Boolean)? = null
+
+    /**
+     * When set, swipes go to it instead of dragging the pages or the page under the finger.
+     */
+    var swipeDetector: SwipeDetector? = null
 
     /**
      * Gesture listener that implements tap and long tap events.
@@ -58,6 +64,7 @@ open class Pager(
      * Dispatches a touch event.
      */
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        swipeDetector?.onTouchEvent(ev)
         val handled = super.dispatchTouchEvent(ev)
         if (isGestureDetectorEnabled) {
             gestureDetector.onTouchEvent(ev)
@@ -70,6 +77,7 @@ open class Pager(
      * views manipulate [requestDisallowInterceptTouchEvent].
      */
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        swipeDetector?.let { return it.isSwiping }
         return try {
             super.onInterceptTouchEvent(ev)
         } catch (e: IllegalArgumentException) {
@@ -82,6 +90,7 @@ open class Pager(
      * [requestDisallowInterceptTouchEvent].
      */
     override fun onTouchEvent(ev: MotionEvent): Boolean {
+        if (swipeDetector != null) return true
         return try {
             super.onTouchEvent(ev)
         } catch (e: NullPointerException) {
@@ -91,6 +100,11 @@ open class Pager(
         } catch (e: IllegalArgumentException) {
             false
         }
+    }
+
+    override fun requestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
+        // A zoomed page asks for this as soon as it pans, which would keep swipes from being taken over.
+        if (swipeDetector == null) super.requestDisallowInterceptTouchEvent(disallowIntercept)
     }
 
     /**
