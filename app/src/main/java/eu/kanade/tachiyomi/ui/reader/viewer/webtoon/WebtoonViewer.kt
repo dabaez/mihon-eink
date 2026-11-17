@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.ui.reader.setting.GeneralSettings
 import eu.kanade.tachiyomi.ui.reader.viewer.LocalPageColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.LongStripSettings
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
+import eu.kanade.tachiyomi.ui.reader.viewer.SwipeDetector
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.collectChanges
 import kotlinx.coroutines.MainScope
@@ -149,6 +150,10 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
             if (old != null && old.theme != new.theme) {
                 ActivityCompat.recreate(activity)
             }
+            if (old?.einkMode != new.einkMode) {
+                frame.swipeDetector = if (new.einkMode) SwipeDetector(activity, ::onSwipe) else null
+                recycler.animateZoom = !new.einkMode
+            }
         }
         settingsViewModel.longStrip.collectChanges(scope) { old, new ->
             if (old != null && old.cropBorders != new.cropBorders) {
@@ -256,6 +261,18 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
             recycler.smoothScrollBy(0, scrollDistance)
         } else {
             recycler.scrollBy(0, scrollDistance)
+        }
+    }
+
+    /**
+     * Scrolls the strip a step, or moves a zoomed-in strip sideways, [towards] that side.
+     */
+    private fun onSwipe(towards: SwipeDetector.Direction) {
+        when (towards) {
+            SwipeDetector.Direction.UP -> moveBackward()
+            SwipeDetector.Direction.DOWN -> moveForward()
+            SwipeDetector.Direction.LEFT -> recycler.panSideways(toRight = false)
+            SwipeDetector.Direction.RIGHT -> recycler.panSideways(toRight = true)
         }
     }
 

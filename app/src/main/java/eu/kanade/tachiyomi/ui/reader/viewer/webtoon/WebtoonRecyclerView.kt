@@ -59,6 +59,11 @@ class WebtoonRecyclerView @JvmOverloads constructor(
 
     var doubleTapZoom = true
 
+    /**
+     * Whether zooming animates; off, it jumps.
+     */
+    var animateZoom = true
+
     var tapListener: ((MotionEvent) -> Unit)? = null
     var longTapListener: ((MotionEvent) -> Boolean)? = null
 
@@ -144,7 +149,7 @@ class WebtoonRecyclerView @JvmOverloads constructor(
             setScaleRate(currentScale)
         }
         animatorSet.playTogether(translationXAnimator, translationYAnimator, scaleAnimator)
-        animatorSet.duration = ANIMATOR_DURATION_TIME.toLong()
+        animatorSet.duration = if (animateZoom) ANIMATOR_DURATION_TIME.toLong() else 0
         animatorSet.interpolator = DecelerateInterpolator()
         animatorSet.start()
         animatorSet.doOnEnd {
@@ -179,6 +184,14 @@ class WebtoonRecyclerView @JvmOverloads constructor(
         animatorSet.start()
 
         return true
+    }
+
+    /**
+     * Moves a zoomed-in strip a screen sideways, towards its right side if [toRight].
+     */
+    fun panSideways(toRight: Boolean) {
+        val distance = halfWidth * 2
+        zoomScrollBy(if (toRight) -distance else distance, 0)
     }
 
     private fun zoomScrollBy(dx: Int, dy: Int) {

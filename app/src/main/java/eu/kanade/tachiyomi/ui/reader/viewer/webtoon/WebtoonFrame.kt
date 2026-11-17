@@ -6,6 +6,7 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.widget.FrameLayout
+import eu.kanade.tachiyomi.ui.reader.viewer.SwipeDetector
 
 /**
  * Frame layout which contains a [WebtoonRecyclerView]. It's needed to handle touch events,
@@ -30,7 +31,17 @@ class WebtoonFrame(context: Context) : FrameLayout(context) {
         set(value) {
             field = value
             recycler?.doubleTapZoom = value
-            scaleDetector.isQuickScaleEnabled = value
+            scaleDetector.isQuickScaleEnabled = value && swipeDetector == null
+        }
+
+    /**
+     * When set, swipes go to it instead of scrolling the strip.
+     */
+    var swipeDetector: SwipeDetector? = null
+        set(value) {
+            field = value
+            // Quick scale drags with one finger, which would also be a swipe
+            scaleDetector.isQuickScaleEnabled = doubleTapZoom && value == null
         }
 
     var zoomOutDisabled = false
@@ -50,7 +61,12 @@ class WebtoonFrame(context: Context) : FrameLayout(context) {
      */
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         scaleDetector.onTouchEvent(ev)
-        flingDetector.onTouchEvent(ev)
+        val swipeDetector = swipeDetector
+        if (swipeDetector == null) {
+            flingDetector.onTouchEvent(ev)
+        } else if (takeSwipe(swipeDetector, ev)) {
+            return true
+        }
 
         // Get the bounding box of the recyclerview and translate any motion events to be within it.
         // Used to allow scrolling outside the recyclerview.
@@ -68,6 +84,21 @@ class WebtoonFrame(context: Context) : FrameLayout(context) {
             ev.y.coerceIn(recyclerRect.top.toFloat(), recyclerRect.bottom.toFloat()),
         )
         return super.dispatchTouchEvent(ev)
+    }
+
+    /**
+     * Whether [ev] is part of a swipe, which the strip mustn't scroll with.
+     */
+    private fun takeSwipe(detector: SwipeDetector, ev: MotionEvent): Boolean {
+        val wasSwiping = detector.isSwiping
+        detector.onTouchEvent(ev)
+        if (!wasSwiping && !detector.isSwiping) return false
+        if (!wasSwiping) {
+            val cancel = MotionEvent.obtain(ev).apply { action = MotionEvent.ACTION_CANCEL }
+            super.dispatchTouchEvent(cancel)
+            cancel.recycle()
+        }
+        return true
     }
 
     /**
