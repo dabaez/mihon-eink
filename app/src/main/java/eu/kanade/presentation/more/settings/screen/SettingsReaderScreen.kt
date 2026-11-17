@@ -127,6 +127,11 @@ object SettingsReaderScreen : SearchableSettings {
             title = "E-Ink",
             preferenceItems = listOf(
                 Preference.PreferenceItem.SwitchPreference(
+                    preference = readerPreferences.einkMode,
+                    title = stringResource(MR.strings.pref_eink_mode),
+                    subtitle = stringResource(MR.strings.pref_eink_mode_summary),
+                ),
+                Preference.PreferenceItem.SwitchPreference(
                     preference = readerPreferences.flashOnPageChange,
                     title = stringResource(MR.strings.pref_flash_page),
                     subtitle = stringResource(MR.strings.pref_flash_page_summ),

@@ -29,6 +29,8 @@ class ReaderPreferences(
         true,
     )
 
+    val einkMode: Preference<Boolean> = preferenceStore.getBoolean("pref_eink_mode", false)
+
     val flashOnPageChange: Preference<Boolean> = preferenceStore.getBoolean("pref_reader_flash", false)
 
     val flashDurationMillis: Preference<Int> = preferenceStore.getInt("pref_reader_flash_duration", MILLI_CONVERSION)
