@@ -58,9 +58,12 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import sh.calvin.reorderable.rememberScroller
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.EinkPageButtons
 import tachiyomi.presentation.core.components.ListGroupHeader
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.ownsEinkSwipes
+import tachiyomi.presentation.core.components.plusEinkPageButtons
+import tachiyomi.presentation.core.components.rememberEinkPager
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
@@ -139,12 +142,13 @@ fun DownloadQueueList(
     val firstDownload = sectionsState.firstOrNull()?.downloads?.firstOrNull()
     val lastDownload = sectionsState.lastOrNull()?.downloads?.lastOrNull()
 
+    val einkPager = rememberEinkPager(lazyListState)
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .onGloballyPositioned { listCoordinates.value = it },
         state = lazyListState,
-        contentPadding = contentPadding,
+        contentPadding = contentPadding.plusEinkPageButtons(einkPager),
     ) {
         sectionsState.forEach { section ->
             item(key = section.key) {
@@ -197,6 +201,7 @@ fun DownloadQueueList(
             }
         }
     }
+    EinkPageButtons(einkPager)
 }
 
 // Lazy list keys must fit in a Bundle

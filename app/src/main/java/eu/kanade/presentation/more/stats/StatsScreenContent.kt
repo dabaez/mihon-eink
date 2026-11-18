@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -21,8 +22,11 @@ import mihon.icons.materialsymbols.rounded.CollectionsBookmark
 import mihon.icons.materialsymbols.rounded.LocalLibrary
 import mihon.icons.materialsymbols.rounded.Schedule
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.EinkPageButtons
 import tachiyomi.presentation.core.components.SectionCard
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.plusEinkPageButtons
+import tachiyomi.presentation.core.components.rememberEinkPager
 import tachiyomi.presentation.core.i18n.stringResource
 import java.util.Locale
 import kotlin.time.DurationUnit
@@ -33,8 +37,11 @@ fun StatsScreenContent(
     state: StatsScreenState.Success,
     paddingValues: PaddingValues,
 ) {
+    val listState = rememberLazyListState()
+    val einkPager = rememberEinkPager(listState)
     LazyColumn(
-        contentPadding = paddingValues,
+        state = listState,
+        contentPadding = paddingValues.plusEinkPageButtons(einkPager),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
     ) {
         item {
@@ -50,6 +57,7 @@ fun StatsScreenContent(
             TrackerStats(state.trackers)
         }
     }
+    EinkPageButtons(einkPager)
 }
 
 @Composable

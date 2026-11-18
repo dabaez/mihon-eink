@@ -22,9 +22,12 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import tachiyomi.domain.category.model.Category
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.EinkPageButtons
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.material.topSmallPaddingValues
+import tachiyomi.presentation.core.components.plusEinkPageButtons
+import tachiyomi.presentation.core.components.rememberEinkPager
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.util.plus
@@ -96,12 +99,13 @@ private fun CategoryContent(
         }
     }
 
+    val einkPager = rememberEinkPager(lazyListState)
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = lazyListState,
         contentPadding = paddingValues +
             topSmallPaddingValues +
-            PaddingValues(horizontal = MaterialTheme.padding.medium),
+            PaddingValues(horizontal = MaterialTheme.padding.medium).plusEinkPageButtons(einkPager),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
     ) {
         items(
@@ -118,6 +122,7 @@ private fun CategoryContent(
             }
         }
     }
+    EinkPageButtons(einkPager)
 }
 
 private val Category.key inline get() = "category-$id"

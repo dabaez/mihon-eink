@@ -45,7 +45,10 @@ import mihon.icons.materialsymbols.rounded.Security
 import mihon.icons.materialsymbols.rounded.Storage
 import mihon.icons.materialsymbols.rounded.Sync
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.EinkPageButtons
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.plusEinkPageButtons
+import tachiyomi.presentation.core.components.rememberEinkPager
 import tachiyomi.presentation.core.i18n.stringResource
 import cafe.adriel.voyager.core.screen.Screen as VoyagerScreen
 
@@ -117,9 +120,10 @@ object SettingsMainScreen : Screen() {
                     null
                 }
 
+                val einkPager = rememberEinkPager(state)
                 LazyColumn(
                     state = state,
-                    contentPadding = contentPadding,
+                    contentPadding = contentPadding.plusEinkPageButtons(einkPager),
                 ) {
                     itemsIndexed(
                         items = items,
@@ -154,6 +158,7 @@ object SettingsMainScreen : Screen() {
                         }
                     }
                 }
+                EinkPageButtons(einkPager)
             },
         )
     }

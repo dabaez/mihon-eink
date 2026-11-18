@@ -24,7 +24,10 @@ import mihon.icons.materialsymbols.rounded.Public
 import mihon.icons.simpleicons.Discord
 import mihon.icons.simpleicons.SimpleIcons
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.EinkPageButtons
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.plusEinkPageButtons
+import tachiyomi.presentation.core.components.rememberEinkPager
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
@@ -38,9 +41,10 @@ fun ExtensionStoresContent(
     onClickDelete: (ExtensionStore) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val einkPager = rememberEinkPager(lazyListState)
     LazyColumn(
         state = lazyListState,
-        contentPadding = paddingValues,
+        contentPadding = paddingValues.plusEinkPageButtons(einkPager),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
         modifier = modifier,
     ) {
@@ -57,6 +61,7 @@ fun ExtensionStoresContent(
             }
         }
     }
+    EinkPageButtons(einkPager)
 }
 
 @Composable

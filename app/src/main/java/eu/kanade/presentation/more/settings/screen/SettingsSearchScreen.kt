@@ -53,7 +53,10 @@ import kotlinx.coroutines.flow.collectLatest
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Close
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.EinkPageButtons
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.plusEinkPageButtons
+import tachiyomi.presentation.core.components.rememberEinkPager
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.util.runOnEnterKeyPressed
@@ -182,10 +185,11 @@ private fun SearchResult(
                 EmptyScreen(stringResource(MR.strings.no_results_found))
             }
             else -> {
+                val einkPager = rememberEinkPager(listState)
                 LazyColumn(
                     modifier = modifier.fillMaxSize(),
                     state = listState,
-                    contentPadding = contentPadding,
+                    contentPadding = contentPadding.plusEinkPageButtons(einkPager),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     items(
@@ -215,6 +219,7 @@ private fun SearchResult(
                         }
                     }
                 }
+                EinkPageButtons(einkPager)
             }
         }
     }

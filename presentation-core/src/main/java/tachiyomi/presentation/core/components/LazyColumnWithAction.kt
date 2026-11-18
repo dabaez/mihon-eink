@@ -1,5 +1,6 @@
 package tachiyomi.presentation.core.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -29,10 +31,16 @@ fun LazyColumnWithAction(
             .padding(contentPadding)
             .fillMaxSize(),
     ) {
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            content = content,
-        )
+        val state = rememberLazyListState()
+        val einkPager = rememberEinkPager(state)
+        Box(modifier = Modifier.weight(1f)) {
+            LazyColumn(
+                state = state,
+                contentPadding = PaddingValues().plusEinkPageButtons(einkPager),
+                content = content,
+            )
+            EinkPageButtons(einkPager)
+        }
 
         HorizontalDivider()
 
