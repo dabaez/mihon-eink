@@ -71,6 +71,9 @@ class EinkPager internal constructor(
     val canPageForward: Boolean
         get() = state.canScrollForward
 
+    val canPage: Boolean
+        get() = canPageBackward || canPageForward
+
     fun page(forward: Boolean) {
         val distance = visibleHeight() * PAGE_FRACTION
         scope.launch { state.scrollBy(if (forward) distance else -distance) }
@@ -266,11 +269,11 @@ private suspend fun SemanticsNode.page(vertical: Boolean, forward: Boolean, isRt
 }
 
 /**
- * These padding values with room at the end for [EinkPageButtons], so they cover nothing of the list.
+ * These padding values with room at the end for [EinkPageButtons] when they show, so they cover nothing of the list.
  */
 @Composable
 fun PaddingValues.plusEinkPageButtons(pager: EinkPager?): PaddingValues =
-    if (pager == null) this else this + PaddingValues(end = PageButtonsWidth)
+    if (pager?.canPage == true) this + PaddingValues(end = PageButtonsWidth) else this
 
 /**
  * Lays out [content] with [EinkPageButtons] over it when there's a [pager], and as is otherwise.
@@ -293,7 +296,7 @@ fun EinkPagingBox(pager: EinkPager?, content: @Composable () -> Unit) {
  */
 @Composable
 fun EinkPageButtons(pager: EinkPager?, modifier: Modifier = Modifier) {
-    if (pager == null || !(pager.canPageBackward || pager.canPageForward)) return
+    if (pager?.canPage != true) return
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
