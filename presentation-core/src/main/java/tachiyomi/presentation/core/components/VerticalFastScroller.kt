@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.sample
 import tachiyomi.presentation.core.components.Scroller.STICKY_HEADER_KEY_PREFIX
+import tachiyomi.presentation.core.util.LocalEinkMode
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
@@ -165,6 +166,7 @@ private fun FastScrollerThumb(
     endContentPadding: Dp,
     horizontalPadding: Dp,
 ) {
+    val einkMode = LocalEinkMode.current
     val dragInteractionSource = remember { MutableInteractionSource() }
     val isThumbDragged by dragInteractionSource.collectIsDraggedAsState()
     var dragOffsetY by remember { mutableFloatStateOf(0f) }
@@ -239,6 +241,7 @@ private fun FastScrollerThumb(
                     Modifier
                 },
             )
+            .then(if (einkMode && isThumbVisible) Modifier.ownsEinkSwipes() else Modifier)
             .then(
                 // Exclude thumb from gesture area only when needed
                 if (isThumbVisible && !isThumbDragged && !state.isScrollInProgress) {

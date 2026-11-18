@@ -21,12 +21,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.node.RootForTest
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsNode
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirstOrNull
+import androidx.compose.ui.util.fastForEach
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.KeyboardArrowDown
@@ -53,7 +70,6 @@ class EinkPager internal constructor(
         get() = state.canScrollForward
 
     fun page(forward: Boolean) {
-        // A little of the last page stays in view to read on from
         val distance = visibleHeight() * PAGE_FRACTION
         scope.launch { state.scrollBy(if (forward) distance else -distance) }
     }
@@ -89,36 +105,144 @@ private fun rememberEinkPager(state: ScrollableState, visibleHeight: () -> Int):
 }
 
 /**
- * Pages with [pager] once a vertical swipe is lifted. The swipe neither scrolls the list nor clicks what's under
- * it. Does nothing without a pager.
+ * In e-ink mode, a swipe over anything scrollable inside this jumps it by a page once the swipe is lifted, instead of
+ * scrolling it under the finger, and clicks nothing. Best at the root of a window, and a dialog is a window of its own.
+ * Scrollables are found through the semantics they have for accessibility, so this covers all of them.
  */
-fun Modifier.einkSwipePaging(pager: EinkPager?): Modifier {
-    if (pager == null) return this
-    return pointerInput(pager) {
-        awaitEachGesture {
-            // The initial pass sees the swipe before the items do, so consuming it keeps them from clicking
-            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-            var isSwiping = false
-            while (true) {
-                val event = awaitPointerEvent(PointerEventPass.Initial)
-                val change = event.changes.fastFirstOrNull { it.id == down.id } ?: break
-                val moved = change.position - down.position
-                if (
-                    !isSwiping &&
-                    event.changes.size == 1 &&
-                    moved.getDistance() > viewConfiguration.touchSlop &&
-                    abs(moved.y) > abs(moved.x)
-                ) {
-                    isSwiping = true
-                }
-                if (isSwiping) change.consume()
-                if (!change.pressed) {
-                    if (isSwiping) pager.page(forward = moved.y < 0)
-                    break
+@Composable
+fun Modifier.einkSwipePaging(): Modifier {
+    if (!LocalEinkMode.current) return this
+    val root = LocalView.current as? RootForTest ?: return this
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val placement = remember { Placement() }
+    return onPlaced { placement.coordinates = it }
+        .pointerInput(root, isRtl) {
+            coroutineScope {
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                    val coordinates = placement.coordinates?.takeIf { it.isAttached } ?: return@awaitEachGesture
+                    val position = coordinates.localToRoot(down.position)
+                    val targets by lazy(LazyThreadSafetyMode.NONE) {
+                        root.semanticsOwner.unmergedRootSemanticsNode.swipeTargetsAt(position)
+                    }
+                    val moved = awaitSwipe(
+                        down = down,
+                        takes = { vertical ->
+                            targets.none { it.ownsSwipes() } && targets.any { it.isScrollable(vertical) }
+                        },
+                        // Even a swipe across a list mustn't click the item it ends on
+                        takesUnclaimed = { targets.none { it.ownsSwipes() } && targets.isNotEmpty() },
+                    ) ?: return@awaitEachGesture
+
+                    val vertical = abs(moved.y) > abs(moved.x)
+                    // Swiping up or left shows what's below or to the right, as dragging would
+                    val forward = if (vertical) moved.y < 0 else moved.x < 0
+                    launch { targets.asReversed().firstOrNull { it.page(vertical, forward, isRtl) } }
                 }
             }
         }
+}
+
+/**
+ * Keeps [einkSwipePaging] from taking swipes that start on this, for a control that drags in its own way.
+ */
+fun Modifier.ownsEinkSwipes(): Modifier = semantics { this[OwnsSwipes] = Unit }
+
+/**
+ * Follows [down]'s gesture to its end and takes it once it moves past the touch slop along an axis [takes] accepts,
+ * or once it's well past it with nothing else having taken it and [takesUnclaimed]. A taken gesture is consumed from
+ * then on, so nothing under it scrolls or clicks. Returns how far a taken gesture moved, or null for any other: a
+ * tap, a pinch, or a drag something else took first.
+ */
+private suspend fun AwaitPointerEventScope.awaitSwipe(
+    down: PointerInputChange,
+    takes: (vertical: Boolean) -> Boolean,
+    takesUnclaimed: () -> Boolean = { false },
+): Offset? {
+    var taken = false
+    var previous: PointerInputChange? = null
+    while (true) {
+        val event = awaitPointerEvent(PointerEventPass.Initial)
+        val change = event.changes.fastFirstOrNull { it.id == down.id } ?: return null
+        val moved = change.position - down.position
+        if (!taken) {
+            if (event.changes.size > 1 || change.isConsumed || previous?.isConsumed == true) return null
+            previous = change
+            val slop = viewConfiguration.touchSlop
+            if (moved.getDistance() > slop) {
+                val vertical = abs(moved.y) > abs(moved.x)
+                // Past the slop on the other axis too, a scrollable along that one would start dragging
+                val across = if (vertical) abs(moved.x) else abs(moved.y)
+                // Twice the slop leaves time for a slider, say, to take it first
+                taken = takes(vertical) ||
+                    (across > slop && takes(!vertical)) ||
+                    (moved.getDistance() > slop * 2 && takesUnclaimed())
+            }
+        }
+        if (taken) change.consume()
+        if (!change.pressed) return if (taken) moved else null
     }
+}
+
+private class Placement {
+    var coordinates: LayoutCoordinates? = null
+}
+
+private val OwnsSwipes = SemanticsPropertyKey<Unit>("OwnsEinkSwipes")
+
+/**
+ * The nodes under [position] that scroll or own swipes, outermost first.
+ */
+private fun SemanticsNode.swipeTargetsAt(position: Offset): List<SemanticsNode> {
+    val targets = mutableListOf<SemanticsNode>()
+    fun visit(node: SemanticsNode) {
+        // Like pages a pager isn't showing, which keep where they last were
+        if (!node.layoutInfo.isPlaced) return
+        val config = node.config
+        val isTarget = node.ownsSwipes() ||
+            SemanticsProperties.VerticalScrollAxisRange in config ||
+            SemanticsProperties.HorizontalScrollAxisRange in config
+        if (isTarget && node.boundsInRoot.contains(position)) targets += node
+        node.children.fastForEach(::visit)
+    }
+    visit(this)
+    return targets
+}
+
+// Sliders drag their own way too
+private fun SemanticsNode.ownsSwipes(): Boolean = OwnsSwipes in config || SemanticsActions.SetProgress in config
+
+private fun SemanticsNode.isScrollable(vertical: Boolean): Boolean =
+    scrollAxisRange(vertical) in config && SemanticsActions.ScrollByOffset in config
+
+private fun scrollAxisRange(vertical: Boolean) =
+    if (vertical) SemanticsProperties.VerticalScrollAxisRange else SemanticsProperties.HorizontalScrollAxisRange
+
+/**
+ * Pages this towards what's below or to the right when [forward], and returns whether it could. The amount's sign
+ * follows what accessibility services do.
+ */
+private suspend fun SemanticsNode.page(vertical: Boolean, forward: Boolean, isRtl: Boolean): Boolean {
+    if (!isScrollable(vertical)) return false
+    val pageAction = when {
+        vertical -> if (forward) SemanticsActions.PageDown else SemanticsActions.PageUp
+        else -> if (forward) SemanticsActions.PageRight else SemanticsActions.PageLeft
+    }
+    // Pagers turn a whole page
+    config.getOrNull(pageAction)?.action?.let { return it() }
+
+    val viewport = config.getOrNull(SemanticsActions.GetScrollViewportLength)?.action
+        ?.let { getLength -> mutableListOf<Float>().takeIf(getLength)?.firstOrNull() }
+        ?: (if (vertical) size.height else size.width).toFloat()
+    var amount = viewport * PAGE_FRACTION
+    val range = config[scrollAxisRange(vertical)]
+    if (!forward) amount = -amount
+    if (range.reverseScrolling) amount = -amount
+    if (isRtl && !vertical) amount = -amount
+    val canScroll = if (amount > 0) range.value() < range.maxValue() else range.value() > 0
+    if (!canScroll) return false
+    val scrollBy = config.getOrNull(SemanticsActions.ScrollByOffset) ?: return false
+    return scrollBy(if (vertical) Offset(0f, amount) else Offset(amount, 0f)) != Offset.Zero
 }
 
 /**
@@ -185,6 +309,7 @@ private fun PageButton(
     }
 }
 
+// A little of the last page stays in view to read on from
 private const val PAGE_FRACTION = 0.9f
 
 private val PageButtonsWidth = 48.dp

@@ -42,6 +42,7 @@ import mihon.feature.common.utils.getLabel
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.LabeledCheckbox
+import tachiyomi.presentation.core.components.einkSwipePaging
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
@@ -78,7 +79,7 @@ internal fun Screen.MigrateMangaDialog(
         },
         text = {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = Modifier.einkSwipePaging().verticalScroll(rememberScrollState()),
             ) {
                 state.applicableFlags.fastForEach { flag ->
                     LabeledCheckbox(

@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
+import tachiyomi.presentation.core.components.einkSwipePaging
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
@@ -74,7 +75,7 @@ fun <T> ListPreferenceDialog(
                 if (message != null) PreferenceDialogMessage(message)
                 Box(modifier = Modifier.weight(1f, fill = false)) {
                     val state = rememberLazyListState()
-                    ScrollbarLazyColumn(state = state) {
+                    ScrollbarLazyColumn(modifier = Modifier.einkSwipePaging(), state = state) {
                         entries.forEach { current ->
                             val isSelected = value == current.key
                             item {

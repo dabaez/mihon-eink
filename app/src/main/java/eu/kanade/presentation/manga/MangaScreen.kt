@@ -71,7 +71,6 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.EinkPageButtons
 import tachiyomi.presentation.core.components.TwoPanelBox
 import tachiyomi.presentation.core.components.VerticalFastScroller
-import tachiyomi.presentation.core.components.einkSwipePaging
 import tachiyomi.presentation.core.components.material.PullRefresh
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.plusEinkPageButtons
@@ -362,11 +361,8 @@ private fun MangaScreenSmallImpl(
                 endContentPadding = contentPadding.calculateEndPadding(layoutDirection),
             ) {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .einkSwipePaging(einkPager),
+                    modifier = Modifier.fillMaxHeight(),
                     state = chapterListState,
-                    userScrollEnabled = einkPager == null,
                     contentPadding = PaddingValues(
                         start = contentPadding.calculateStartPadding(layoutDirection),
                         end = contentPadding.calculateEndPadding(layoutDirection),
@@ -643,11 +639,8 @@ fun MangaScreenLargeImpl(
                         topContentPadding = contentPadding.calculateTopPadding(),
                     ) {
                         LazyColumn(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .einkSwipePaging(einkPager),
+                            modifier = Modifier.fillMaxHeight(),
                             state = chapterListState,
-                            userScrollEnabled = einkPager == null,
                             contentPadding = PaddingValues(
                                 top = contentPadding.calculateTopPadding(),
                                 bottom = contentPadding.calculateBottomPadding(),

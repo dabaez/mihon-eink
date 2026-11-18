@@ -29,6 +29,7 @@ import mihon.icons.materialsymbols.rounded.CheckBoxOutlineBlank
 import mihon.icons.materialsymbols.roundedfilled.CheckBox
 import mihon.icons.materialsymbols.roundedfilled.DisabledByDefault
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.einkSwipePaging
 import tachiyomi.presentation.core.i18n.stringResource
 
 private enum class State {
@@ -73,7 +74,7 @@ fun <T> TriStateListDialog(
 
                 Box {
                     val listState = rememberLazyListState()
-                    LazyColumn(state = listState) {
+                    LazyColumn(modifier = Modifier.einkSwipePaging(), state = listState) {
                         itemsIndexed(items = items) { index, item ->
                             val state = selected[index]
                             Row(

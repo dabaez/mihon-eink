@@ -74,6 +74,7 @@ fun AdaptiveSheet(
         }
         Box(
             modifier = Modifier
+                .einkSwipePaging()
                 .clickable(
                     interactionSource = null,
                     indication = null,
@@ -126,6 +127,7 @@ fun AdaptiveSheet(
         }
         Box(
             modifier = Modifier
+                .einkSwipePaging()
                 .clickable(
                     interactionSource = null,
                     indication = null,

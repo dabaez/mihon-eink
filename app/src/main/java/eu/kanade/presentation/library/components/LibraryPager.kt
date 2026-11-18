@@ -25,7 +25,6 @@ import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.screens.EmptyScreen
-import tachiyomi.presentation.core.util.LocalEinkMode
 import tachiyomi.presentation.core.util.plus
 
 @Composable
@@ -47,8 +46,6 @@ fun LibraryPager(
     HorizontalPager(
         modifier = Modifier.fillMaxSize(),
         state = state,
-        // Paging by drag would move the screen under the finger, so it's only through the tabs
-        userScrollEnabled = !LocalEinkMode.current,
         verticalAlignment = Alignment.Top,
     ) { page ->
         if (page !in ((state.currentPage - 1)..(state.currentPage + 1))) {

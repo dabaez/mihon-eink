@@ -39,13 +39,12 @@ fun ScrollbarLazyColumn(
         propagateMinConstraints = true,
     ) {
         LazyColumn(
-            modifier = Modifier.einkSwipePaging(einkPager),
             state = state,
             contentPadding = contentPadding.plusEinkPageButtons(einkPager),
             reverseLayout = reverseLayout,
             verticalArrangement = verticalArrangement,
             horizontalAlignment = horizontalAlignment,
-            userScrollEnabled = userScrollEnabled && einkPager == null,
+            userScrollEnabled = userScrollEnabled,
             content = content,
         )
         state.scrollIndicatorState?.let { indicatorState ->
@@ -91,13 +90,12 @@ fun FastScrollLazyColumn(
         endContentPadding = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
     ) {
         LazyColumn(
-            modifier = Modifier.einkSwipePaging(einkPager),
             state = state,
             contentPadding = contentPadding.plusEinkPageButtons(einkPager),
             reverseLayout = reverseLayout,
             verticalArrangement = verticalArrangement,
             horizontalAlignment = horizontalAlignment,
-            userScrollEnabled = userScrollEnabled && einkPager == null,
+            userScrollEnabled = userScrollEnabled,
             content = content,
         )
         EinkPageButtons(einkPager)

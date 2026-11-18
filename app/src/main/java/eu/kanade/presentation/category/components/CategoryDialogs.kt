@@ -30,6 +30,7 @@ import eu.kanade.presentation.category.visualName
 import tachiyomi.core.common.preference.CheckboxState
 import tachiyomi.domain.category.model.Category
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.einkSwipePaging
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
@@ -251,7 +252,7 @@ fun ChangeCategoryDialog(
         },
         text = {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = Modifier.einkSwipePaging().verticalScroll(rememberScrollState()),
             ) {
                 selection.forEach { checkbox ->
                     val onChange: (CheckboxState<Category>) -> Unit = {

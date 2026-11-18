@@ -20,6 +20,7 @@ import sh.calvin.reorderable.ReorderableCollectionItemScope
 import tachiyomi.domain.category.model.Category
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.ownsEinkSwipes
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
@@ -46,7 +47,8 @@ fun ReorderableCollectionItemScope.CategoryListItem(
                 contentDescription = null,
                 modifier = Modifier
                     .padding(MaterialTheme.padding.medium)
-                    .draggableHandle(),
+                    .draggableHandle()
+                    .ownsEinkSwipes(),
             )
             Text(
                 text = category.name,

@@ -18,7 +18,6 @@ import eu.kanade.presentation.components.TabbedDialogPaddings
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsViewModel
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.EinkPagingBox
-import tachiyomi.presentation.core.components.einkSwipePaging
 import tachiyomi.presentation.core.components.plusEinkPageButtons
 import tachiyomi.presentation.core.components.rememberEinkPager
 import tachiyomi.presentation.core.i18n.stringResource
@@ -65,8 +64,7 @@ fun ReaderSettingsDialog(
                 Column(
                     modifier = Modifier
                         .padding(PaddingValues(vertical = TabbedDialogPaddings.Vertical).plusEinkPageButtons(einkPager))
-                        .einkSwipePaging(einkPager)
-                        .verticalScroll(scrollState, enabled = einkPager == null),
+                        .verticalScroll(scrollState),
                 ) {
                     when (page) {
                         0 -> ReadingModePage(viewModel)

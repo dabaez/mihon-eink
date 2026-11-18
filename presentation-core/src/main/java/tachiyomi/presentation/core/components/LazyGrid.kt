@@ -44,13 +44,12 @@ fun FastScrollLazyVerticalGrid(
     ) {
         LazyVerticalGrid(
             columns = columns,
-            modifier = Modifier.einkSwipePaging(einkPager),
             state = state,
             contentPadding = contentPadding.plusEinkPageButtons(einkPager),
             reverseLayout = reverseLayout,
             verticalArrangement = verticalArrangement,
             horizontalArrangement = horizontalArrangement,
-            userScrollEnabled = userScrollEnabled && einkPager == null,
+            userScrollEnabled = userScrollEnabled,
             content = content,
         )
         EinkPageButtons(einkPager)

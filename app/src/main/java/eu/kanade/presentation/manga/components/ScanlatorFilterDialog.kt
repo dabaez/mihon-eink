@@ -28,6 +28,7 @@ import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.CheckBoxOutlineBlank
 import mihon.icons.materialsymbols.roundedfilled.DisabledByDefault
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.einkSwipePaging
 import tachiyomi.presentation.core.components.material.TextButton
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
@@ -53,7 +54,7 @@ fun ScanlatorFilterDialog(
             }
             Box {
                 val state = rememberLazyListState()
-                LazyColumn(state = state) {
+                LazyColumn(modifier = Modifier.einkSwipePaging(), state = state) {
                     sortedAvailableScanlators.forEach { scanlator ->
                         item {
                             val isExcluded = mutableExcludedScanlators.contains(scanlator)

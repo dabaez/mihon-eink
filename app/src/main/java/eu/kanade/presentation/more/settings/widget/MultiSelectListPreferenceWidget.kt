@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.window.DialogProperties
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.LabeledCheckbox
+import tachiyomi.presentation.core.components.einkSwipePaging
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
@@ -67,7 +68,7 @@ fun <T> MultiSelectListPreferenceDialog(
         text = {
             Column {
                 if (message != null) PreferenceDialogMessage(message)
-                LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
+                LazyColumn(modifier = Modifier.weight(1f, fill = false).einkSwipePaging()) {
                     entries.forEach { current ->
                         item {
                             val isSelected = selected.contains(current.key)

@@ -60,6 +60,7 @@ import sh.calvin.reorderable.rememberScroller
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.ListGroupHeader
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.ownsEinkSwipes
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
@@ -382,6 +383,7 @@ private fun ReorderableCollectionItemScope.DragHandle(onDragStarted: () -> Unit,
                 onDragStarted = { onDragStarted() },
                 onDragStopped = onDragStopped,
             )
+            .ownsEinkSwipes()
             .padding(MaterialTheme.padding.small),
     )
 }
