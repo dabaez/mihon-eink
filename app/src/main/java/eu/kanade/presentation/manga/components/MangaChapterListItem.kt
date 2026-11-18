@@ -42,7 +42,9 @@ import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.DISABLED_ALPHA
 import tachiyomi.presentation.core.components.material.SECONDARY_ALPHA
+import tachiyomi.presentation.core.components.onEinkSideSwipe
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.LocalEinkMode
 import tachiyomi.presentation.core.util.selectedBackground
 
 @Composable
@@ -82,10 +84,14 @@ fun MangaChapterListItem(
         onSwipe = { onChapterSwipe(chapterSwipeEndAction) },
     )
 
+    // E-ink mode acts once the swipe is lifted, so the row doesn't slide under the finger
+    val einkMode = LocalEinkMode.current
     SwipeableActionsBox(
-        modifier = Modifier.clipToBounds(),
-        startActions = listOfNotNull(start),
-        endActions = listOfNotNull(end),
+        modifier = Modifier
+            .clipToBounds()
+            .onEinkSideSwipe { towardsEnd -> (if (towardsEnd) start else end)?.onSwipe?.invoke() },
+        startActions = if (einkMode) emptyList() else listOfNotNull(start),
+        endActions = if (einkMode) emptyList() else listOfNotNull(end),
         swipeThreshold = swipeActionThreshold,
         backgroundUntilSwipeThreshold = MaterialTheme.colorScheme.surfaceContainerLowest,
     ) {

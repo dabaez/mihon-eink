@@ -17,8 +17,10 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -147,6 +149,24 @@ fun Modifier.einkSwipePaging(): Modifier {
  * Keeps [einkSwipePaging] from taking swipes that start on this, for a control that drags in its own way.
  */
 fun Modifier.ownsEinkSwipes(): Modifier = semantics { this[OwnsSwipes] = Unit }
+
+/**
+ * In e-ink mode, calls [onSwipe] once a sideways swipe is lifted, for swipe actions that mustn't slide. [onSwipe] is
+ * told whether the finger moved towards the end, which is right in left-to-right layouts.
+ */
+@Composable
+fun Modifier.onEinkSideSwipe(onSwipe: (towardsEnd: Boolean) -> Unit): Modifier {
+    if (!LocalEinkMode.current) return this
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val currentOnSwipe by rememberUpdatedState(onSwipe)
+    return pointerInput(isRtl) {
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+            val moved = awaitSwipe(down, takes = { vertical -> !vertical }) ?: return@awaitEachGesture
+            if (abs(moved.x) > abs(moved.y)) currentOnSwipe((moved.x > 0) != isRtl)
+        }
+    }
+}
 
 /**
  * Follows [down]'s gesture to its end and takes it once it moves past the touch slop along an axis [takes] accepts,
