@@ -30,6 +30,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.node.RootForTest
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -274,6 +275,21 @@ private suspend fun SemanticsNode.page(vertical: Boolean, forward: Boolean, isRt
 @Composable
 fun PaddingValues.plusEinkPageButtons(pager: EinkPager?): PaddingValues =
     if (pager?.canPage == true) this + PaddingValues(end = PageButtonsWidth) else this
+
+/**
+ * Lets this item of a list padded by [plusEinkPageButtons] run on under the buttons, for a backdrop that would look cut
+ * off otherwise.
+ */
+fun Modifier.underEinkPageButtons(pager: EinkPager?): Modifier {
+    if (pager == null) return this
+    return layout { measurable, constraints ->
+        val room = if (pager.canPage) PageButtonsWidth.roundToPx() else 0
+        val placeable = measurable.measure(
+            constraints.copy(minWidth = constraints.minWidth + room, maxWidth = constraints.maxWidth + room),
+        )
+        layout(constraints.maxWidth, placeable.height) { placeable.placeRelative(0, 0) }
+    }
+}
 
 /**
  * Lays out [content] with [EinkPageButtons] over it when there's a [pager], and as is otherwise.

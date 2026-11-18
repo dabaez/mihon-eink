@@ -75,6 +75,7 @@ import tachiyomi.presentation.core.components.material.PullRefresh
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.plusEinkPageButtons
 import tachiyomi.presentation.core.components.rememberEinkPager
+import tachiyomi.presentation.core.components.underEinkPageButtons
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.shouldExpandFAB
 import tachiyomi.source.local.isLocal
@@ -382,6 +383,7 @@ private fun MangaScreenSmallImpl(
                             isStubSource = remember { state.source is StubSource },
                             onCoverClick = onCoverClicked,
                             doSearch = onSearch,
+                            modifier = Modifier.underEinkPageButtons(einkPager),
                         )
                     }
 
