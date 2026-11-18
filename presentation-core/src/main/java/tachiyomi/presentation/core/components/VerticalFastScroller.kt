@@ -182,7 +182,8 @@ private fun FastScrollerThumb(
         snapshotFlow { dragOffsetY }
             .collectLatest { offsetY ->
                 if (!isThumbDragged) return@collectLatest
-                position.scrollTo(position.proportionAt(offsetY))
+                // E-ink screens only jump to where the thumb is let go
+                if (!einkMode) position.scrollTo(position.proportionAt(offsetY))
                 scrolled.tryEmit(Unit)
             }
     }
@@ -230,6 +231,7 @@ private fun FastScrollerThumb(
                         interactionSource = dragInteractionSource,
                         orientation = Orientation.Vertical,
                         onDragStarted = { dragOffsetY = position.thumbOffsetY },
+                        onDragStopped = { if (einkMode) position.scrollTo(position.proportionAt(dragOffsetY)) },
                         state = rememberDraggableState { delta ->
                             dragOffsetY = (dragOffsetY + delta).coerceIn(
                                 position.trackTop,
