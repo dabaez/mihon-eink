@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import tachiyomi.presentation.core.util.LocalEinkMode
 import kotlin.math.roundToInt
 
 @Composable
@@ -112,6 +113,8 @@ fun AdaptiveSheet(
             }
         }
     } else {
+        // Dragging would slide the sheet under the finger
+        val swipeDismiss = enableImplicitDismiss && !LocalEinkMode.current
         val anchoredDraggableState = rememberSaveable(saver = AnchoredDraggableState.Saver()) {
             AnchoredDraggableState(initialValue = 1)
         }
@@ -152,7 +155,7 @@ fun AdaptiveSheet(
                         onClick = {},
                     )
                     .then(
-                        if (enableImplicitDismiss) {
+                        if (swipeDismiss) {
                             Modifier.nestedScroll(
                                 remember(anchoredDraggableState) {
                                     anchoredDraggableState.preUpPostDownNestedScrollConnection {
@@ -177,7 +180,7 @@ fun AdaptiveSheet(
                     .anchoredDraggable(
                         state = anchoredDraggableState,
                         orientation = Orientation.Vertical,
-                        enabled = enableImplicitDismiss,
+                        enabled = swipeDismiss,
                         flingBehavior = flingBehavior,
                     )
                     .navigationBarsPadding()
