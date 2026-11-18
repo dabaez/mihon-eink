@@ -58,6 +58,7 @@ import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
+import androidx.core.view.WindowCompat
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import androidx.lifecycle.Lifecycle
@@ -187,6 +188,10 @@ class MainActivity : BaseActivity() {
             finish()
             return
         }
+
+        // Before the first layout: below Android 11, switching later doesn't apply the insets again, so the decor
+        // keeps padding the content by the status bar on top of the app's own insets
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setComposeContent {
             val appMigrating by isAppMigrating.collectAsState()
