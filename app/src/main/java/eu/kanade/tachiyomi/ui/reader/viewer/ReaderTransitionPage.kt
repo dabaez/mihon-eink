@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +20,7 @@ import eu.kanade.presentation.reader.reportPress
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.CircularLoadingIndicator
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
@@ -57,7 +57,7 @@ fun ReaderTransitionPage(
                 modifier = Modifier.padding(statusPadding),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                CircularProgressIndicator()
+                CircularLoadingIndicator()
                 Text(
                     text = stringResource(MR.strings.transition_pages_loading),
                     color = MaterialTheme.colorScheme.onBackground,

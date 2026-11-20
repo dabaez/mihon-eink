@@ -75,6 +75,7 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.EmptyScreenAction
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.theme.header
+import tachiyomi.presentation.core.util.LocalEinkMode
 import tachiyomi.presentation.core.util.plus
 
 @Composable
@@ -376,7 +377,8 @@ private fun ExtensionItemIcon(
         contentAlignment = Alignment.Center,
     ) {
         val idle = installStep.isCompleted()
-        if (!idle) {
+        // In e-ink mode a spinner can't spin, and the install step's text already shows it's busy
+        if (!idle && !LocalEinkMode.current) {
             CircularProgressIndicator(
                 modifier = Modifier.size(48.dp),
                 strokeWidth = 2.dp,

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +55,7 @@ import tachiyomi.core.common.Constants
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.release.interactor.GetApplicationRelease
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.CircularLoadingIndicator
 import tachiyomi.presentation.core.components.LinkIcon
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
@@ -116,7 +116,7 @@ fun AboutScreen() {
                         title = stringResource(MR.strings.check_for_updates),
                         widget = {
                             AnimatedVisibility(visible = isCheckingUpdates) {
-                                CircularProgressIndicator(
+                                CircularLoadingIndicator(
                                     modifier = Modifier.size(28.dp),
                                     strokeWidth = 3.dp,
                                 )

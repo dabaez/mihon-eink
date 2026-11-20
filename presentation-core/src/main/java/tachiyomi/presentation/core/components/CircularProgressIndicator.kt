@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
@@ -29,8 +31,35 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import mihon.icons.materialsymbols.MaterialSymbols
+import mihon.icons.materialsymbols.rounded.HourglassEmpty
 import tachiyomi.presentation.core.util.LocalEinkMode
+
+/**
+ * An indeterminate [CircularProgressIndicator], or in e-ink mode a still hourglass of the same size, as a spinner
+ * that can't spin reads as stuck.
+ */
+@Composable
+fun CircularLoadingIndicator(
+    modifier: Modifier = Modifier,
+    color: Color = ProgressIndicatorDefaults.circularColor,
+    strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth,
+) {
+    if (LocalEinkMode.current) {
+        Icon(
+            imageVector = MaterialSymbols.Rounded.HourglassEmpty,
+            contentDescription = null,
+            modifier = modifier.size(40.dp),
+            tint = color,
+        )
+        return
+    }
+    CircularProgressIndicator(modifier = modifier, color = color, strokeWidth = strokeWidth)
+}
 
 /**
  * A combined [CircularProgressIndicator] that always rotates.
