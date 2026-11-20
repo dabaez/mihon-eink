@@ -5,6 +5,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -39,6 +40,7 @@ import mihon.icons.materialsymbols.roundedfilled.CheckCircle
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.IconButtonTokens
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.LocalEinkMode
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
 enum class ChapterDownloadAction {
@@ -135,7 +137,17 @@ private fun DownloadingIndicator(
         val downloadProgress = downloadProgressProvider()
         val indeterminate = downloadState == Download.State.QUEUE ||
             (downloadState == Download.State.DOWNLOADING && downloadProgress == 0)
-        if (indeterminate) {
+        if (LocalEinkMode.current) {
+            // A still wave or spinner reads as stuck, so this only fills
+            CircularProgressIndicator(
+                progress = { if (indeterminate) 0f else downloadProgress / 100f },
+                modifier = IndicatorModifier,
+                color = color,
+                strokeWidth = IndicatorStrokeWidth,
+                trackColor = trackColor,
+                strokeCap = StrokeCap.Round,
+            )
+        } else if (indeterminate) {
             CircularWavyProgressIndicator(
                 modifier = IndicatorModifier,
                 color = color,
