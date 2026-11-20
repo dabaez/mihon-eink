@@ -152,10 +152,26 @@ fun Modifier.einkSwipePaging(): Modifier {
                     val vertical = abs(moved.y) > abs(moved.x)
                     // Swiping up or left shows what's below or to the right, as dragging would
                     val forward = if (vertical) moved.y < 0 else moved.x < 0
-                    launch { targets.asReversed().firstOrNull { it.page(vertical, forward, isRtl, density) } }
+                    launch {
+                        val paged = targets.asReversed().any { it.page(vertical, forward, isRtl, density) }
+                        // Already at the top, a swipe down refreshes, as pulling would
+                        if (!paged && vertical && !forward) {
+                            targets.lastOrNull { Refresh in it.config }?.config?.get(Refresh)?.invoke()
+                        }
+                    }
                 }
             }
         }
+}
+
+/**
+ * In e-ink mode, has [einkSwipePaging] call [onRefresh] for a swipe down on a list in this that's already at its top,
+ * in place of pull to refresh, which slides.
+ */
+@Composable
+fun Modifier.onEinkPullRefresh(enabled: Boolean, onRefresh: () -> Unit): Modifier {
+    if (!LocalEinkMode.current || !enabled) return this
+    return semantics { this[Refresh] = onRefresh }
 }
 
 /**
@@ -228,6 +244,7 @@ private class Placement {
 }
 
 private val OwnsSwipes = SemanticsPropertyKey<Unit>("OwnsEinkSwipes")
+private val Refresh = SemanticsPropertyKey<() -> Unit>("EinkRefresh")
 private val CoveredTop = SemanticsPropertyKey<Dp>("EinkCoveredTop")
 
 /**
@@ -240,6 +257,7 @@ private fun SemanticsNode.swipeTargetsAt(position: Offset): List<SemanticsNode> 
         if (!node.layoutInfo.isPlaced) return
         val config = node.config
         val isTarget = node.ownsSwipes() ||
+            Refresh in config ||
             SemanticsProperties.VerticalScrollAxisRange in config ||
             SemanticsProperties.HorizontalScrollAxisRange in config
         if (isTarget && node.boundsInRoot.contains(position)) targets += node

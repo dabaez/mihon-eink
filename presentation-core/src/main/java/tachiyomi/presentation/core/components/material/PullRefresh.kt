@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import tachiyomi.presentation.core.components.onEinkPullRefresh
 
 /**
  * @param refreshing Whether the layout is currently refreshing
@@ -36,7 +37,8 @@ fun PullRefresh(
                 state = state,
                 enabled = enabled,
                 onRefresh = onRefresh,
-            ),
+            )
+            .onEinkPullRefresh(enabled = enabled && !refreshing, onRefresh = onRefresh),
     ) {
         content()
 
