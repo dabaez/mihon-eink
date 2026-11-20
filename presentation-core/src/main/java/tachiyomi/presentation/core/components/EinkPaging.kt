@@ -33,6 +33,7 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.node.RootForTest
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.SemanticsActions
@@ -41,6 +42,8 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirstOrNull
@@ -82,11 +85,15 @@ class EinkPager internal constructor(
 }
 
 /**
- * A pager for [state] in e-ink mode, otherwise null.
+ * A pager for [state] in e-ink mode, otherwise null. [coveredTop] is how much of the list's top a bar it scrolls
+ * under hides, which a page then leaves out, as [einkCoveredTop] does for swipes.
  */
 @Composable
-fun rememberEinkPager(state: LazyListState): EinkPager? = rememberEinkPager(state) {
-    with(state.layoutInfo) { viewportSize.height - beforeContentPadding - afterContentPadding }
+fun rememberEinkPager(state: LazyListState, coveredTop: Dp = 0.dp): EinkPager? {
+    val covered = with(LocalDensity.current) { coveredTop.roundToPx() }
+    return rememberEinkPager(state) {
+        with(state.layoutInfo) { viewportSize.height - beforeContentPadding - afterContentPadding - covered }
+    }
 }
 
 /**
@@ -107,7 +114,8 @@ fun rememberEinkPager(state: ScrollState): EinkPager? = rememberEinkPager(state)
 private fun rememberEinkPager(state: ScrollableState, visibleHeight: () -> Int): EinkPager? {
     if (!LocalEinkMode.current) return null
     val scope = rememberCoroutineScope()
-    return remember(state, scope) { EinkPager(state, scope, visibleHeight) }
+    val currentVisibleHeight by rememberUpdatedState(visibleHeight)
+    return remember(state, scope) { EinkPager(state, scope) { currentVisibleHeight() } }
 }
 
 /**
@@ -123,6 +131,7 @@ fun Modifier.einkSwipePaging(): Modifier {
     val placement = remember { Placement() }
     return onPlaced { placement.coordinates = it }
         .pointerInput(root, isRtl) {
+            val density: Density = this
             coroutineScope {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
@@ -143,11 +152,17 @@ fun Modifier.einkSwipePaging(): Modifier {
                     val vertical = abs(moved.y) > abs(moved.x)
                     // Swiping up or left shows what's below or to the right, as dragging would
                     val forward = if (vertical) moved.y < 0 else moved.x < 0
-                    launch { targets.asReversed().firstOrNull { it.page(vertical, forward, isRtl) } }
+                    launch { targets.asReversed().firstOrNull { it.page(vertical, forward, isRtl, density) } }
                 }
             }
         }
 }
+
+/**
+ * Has [einkSwipePaging] leave out the [top] of this list, which a bar the list scrolls under hides, from how far it
+ * pages.
+ */
+fun Modifier.einkCoveredTop(top: Dp): Modifier = semantics { this[CoveredTop] = top }
 
 /**
  * Keeps [einkSwipePaging] from taking swipes that start on this, for a control that drags in its own way.
@@ -213,6 +228,7 @@ private class Placement {
 }
 
 private val OwnsSwipes = SemanticsPropertyKey<Unit>("OwnsEinkSwipes")
+private val CoveredTop = SemanticsPropertyKey<Dp>("EinkCoveredTop")
 
 /**
  * The nodes under [position] that scroll or own swipes, outermost first.
@@ -246,7 +262,12 @@ private fun scrollAxisRange(vertical: Boolean) =
  * Pages this towards what's below or to the right when [forward], and returns whether it could. The amount's sign
  * follows what accessibility services do.
  */
-private suspend fun SemanticsNode.page(vertical: Boolean, forward: Boolean, isRtl: Boolean): Boolean {
+private suspend fun SemanticsNode.page(
+    vertical: Boolean,
+    forward: Boolean,
+    isRtl: Boolean,
+    density: Density,
+): Boolean {
     if (!isScrollable(vertical)) return false
     val pageAction = when {
         vertical -> if (forward) SemanticsActions.PageDown else SemanticsActions.PageUp
@@ -258,7 +279,8 @@ private suspend fun SemanticsNode.page(vertical: Boolean, forward: Boolean, isRt
     val viewport = config.getOrNull(SemanticsActions.GetScrollViewportLength)?.action
         ?.let { getLength -> mutableListOf<Float>().takeIf(getLength)?.firstOrNull() }
         ?: (if (vertical) size.height else size.width).toFloat()
-    var amount = viewport * PAGE_FRACTION
+    val covered = config.getOrNull(CoveredTop)?.takeIf { vertical }?.let { with(density) { it.toPx() } } ?: 0f
+    var amount = (viewport - covered) * PAGE_FRACTION
     val range = config[scrollAxisRange(vertical)]
     if (!forward) amount = -amount
     if (range.reverseScrolling) amount = -amount

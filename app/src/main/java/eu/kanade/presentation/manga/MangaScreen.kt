@@ -71,6 +71,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.EinkPageButtons
 import tachiyomi.presentation.core.components.TwoPanelBox
 import tachiyomi.presentation.core.components.VerticalFastScroller
+import tachiyomi.presentation.core.components.einkCoveredTop
 import tachiyomi.presentation.core.components.material.PullRefresh
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.plusEinkPageButtons
@@ -355,14 +356,17 @@ private fun MangaScreenSmallImpl(
             indicatorPadding = PaddingValues(top = topPadding),
         ) {
             val layoutDirection = LocalLayoutDirection.current
-            val einkPager = rememberEinkPager(chapterListState)
+            // The list runs under the top bar, for the backdrop
+            val einkPager = rememberEinkPager(chapterListState, coveredTop = topPadding)
             VerticalFastScroller(
                 listState = chapterListState,
                 topContentPadding = topPadding,
                 endContentPadding = contentPadding.calculateEndPadding(layoutDirection),
             ) {
                 LazyColumn(
-                    modifier = Modifier.fillMaxHeight(),
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .einkCoveredTop(topPadding),
                     state = chapterListState,
                     contentPadding = PaddingValues(
                         start = contentPadding.calculateStartPadding(layoutDirection),
